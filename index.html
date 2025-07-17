@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="מזים מתיקות התורה - מיזם לימוד משותף של פרק המפקיד - כל הפרטים אודות המיזם במקום אחד">
+    <meta property="og:title" content="מתיקות התורה - אור ישראלי">
+    <meta property="og:description" content="מיזם לימוד משותף של פרק המפקיד - כל הפרטים אודות המיזם במקום אחד">
+    <meta property="og:image" content="./assets/logos/metikut-hatorah-logo.png">
+    <!-- <meta property="og:url" content="https://metikut.onrender.com/"> -->
+    <meta name="theme-color" content="#1abc9c" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#1abc9c" media="(prefers-color-scheme: dark)">
+    <meta name="msapplication-navbutton-color" content="#1abc9c">
+    <meta name="apple-mobile-web-app-status-bar-style" content="#1abc9c">
+
+    <link rel="icon" type="image/png" href="./assets/logos/or-israeli-logo.png">
+    <link rel="apple-touch-icon" href="./assets/logos/or-israeli-logo.png">
+
+    <!-- הוספת VideoJS -->
+    <link href="https://vjs.zencdn.net/8.5.2/video-js.css" rel="stylesheet" />
+
+    <title>מתיקות התורה</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dark-mode.css">
+    <link rel="stylesheet" href="css/carousel.css">
+    <script src="js/config.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/updates.js"></script>
+    <script src="js/animations.js"></script>
+    <script src="js/viewer.js"></script>
+    <script src="js/carousel.js"></script>
+    <script src="js/main.js"></script>
+</head>
+
+<body>
+    <div id="loading" class="loading hidden">
+        <div class="spinner"></div>
+        <p>טוען...</p>
+    </div>
+    <header>
+        <div class="logo-container">
+            <div class="secondary-logo">
+                <img src="assets/logos/or-israeli-logo.png" alt="אור ישראלי">
+            </div>
+            <div class="main-logo">
+                <img src="assets/logos/metikut-hatorah-logo.png" alt="מתיקות התורה">
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- אזור ברוכים הבאים -->
+        <section class="welcome-section animate-on-scroll">
+            <div class="welcome-header">
+                <h1>ברוכים הבאים למיזם מתיקות התורה</h1>
+                <p class="welcome-subtitle">לימוד זמן קיץ - אגדות חזל על תקופת חורבן בית המקדש והגאולה</p>
+            </div>
+            <div class="start-date">
+                <span class="material-icons">event</span>
+                <p>זמן קיץ - תשפ"ה</p>
+            </div>
+            <div class="welcome-header">
+                <br>
+                <p class="welcome-subtitle">פנו עוד עכשיו לרב הסניף שלכם לקבל את החוברת</p>
+            </div>
+            </div>
+        </section>
+
+        <!-- תפריט ניווט -->
+        <nav class="main-nav">
+            <a href="#" class="nav-button" onclick="handleQuizNavigation(event)">
+                <span class="material-icons">quiz</span>
+                חידון שבועי
+            </a>
+            <!-- <a href="register.html" class="nav-button">
+                <span class="material-icons">how_to_reg</span>
+                רישום למיזם
+            </a> -->
+            <!-- <a href="podcast.html" class="nav-button">
+                <span class="material-icons">headphones</span>
+                פודקאסט - מאזינים למפקיד
+            </a> -->
+            <a href="winners.html" class="nav-button">
+                <span class="material-icons">emoji_events</span>
+                זוכי החידון            </a>
+            <!-- <a href="#faq-section" class="nav-button">
+                <span class="material-icons">help_outline</span>
+                שאלות נפוצות
+            </a> -->
+
+            <!-- חומרי לימוד -->
+
+
+
+            <!-- <a href="#downloads-section" class="nav-button">
+                <span class="material-icons">menu_book</span>
+                חומרי לימוד
+            </a> -->
+
+
+        </nav>
+
+        <!-- אזור מודעות -->
+        <section id="ads-section" class="ads-section animate-on-scroll">
+            <h2 class="section-title">
+                <span class="material-icons">campaign</span>
+                לוח מודעות
+            </h2>
+            <div class="carousel-container">
+                <div class="carousel-wrapper">
+                    <div class="carousel-slides">
+                        <!-- מודעה ראשונה - moda_gmar2 -->
+                        <div class="carousel-slide">
+                            <div class="ad-card">
+                                <img src="assets/ads/add1.jpg" alt="מודעת פרסים" class="ad-image">
+                                <div class="ad-overlay">
+                                    <span class="material-icons">fullscreen</span>
+                                    <span>לחץ להגדלה</span>
+                                </div>
+                            </div>
+                        </div>
+                        מודעה שנייה - moda_gmar
+                        <!-- <div class="carousel-slide">
+                            <div class="ad-card">
+                                <img src="assets/ads/moda_gmar.jpg" alt="מודעת סיום" class="ad-image">
+                                <div class="ad-overlay">
+                                    <span class="material-icons">fullscreen</span>
+                                    <span>לחץ להגדלה</span>
+                                </div>
+                            </div>
+                        </div> -->
+                    </div>
+                    <!-- <button class="carousel-button prev">
+                        <span class="material-icons">chevron_right</span>
+                    </button>
+                    <button class="carousel-button next">
+                        <span class="material-icons">chevron_left</span>
+                    </button> -->
+                </div>
+                <div class="carousel-dots"></div>
+            </div>
+        </section>
+
+        <!-- אזור עדכונים -->
+        <section class="updates-section animate-on-scroll">
+            <h2 class="section-title">
+                <span class="material-icons">campaign</span>
+                עדכונים אחרונים
+            </h2>
+            <div id="updates-container" class="updates-container">
+                <div class="loading-updates">
+                    <div class="spinner"></div>
+                    <p>טוען עדכונים...</p>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- שאלות נפוצות -->
+        <!-- <section class="faq-section animate-on-scroll" id="faq-section">
+            <h2 class="section-title">
+                <span class="material-icons">help_outline</span>
+                שאלות נפוצות
+            </h2>
+            <div class="faq-container">
+                <details class="faq-item">
+                    <summary>האם צריך להירשם?</summary>
+                    <p>במיזם זה אין רישום, צריך רק לבקש מרב הסניף את החוברת.</p>
+                </details>
+
+                <details class="faq-item">
+                    <summary>מה בדיוק יש בחוברת?</summary>
+                    <p>גמרא + ביאור הגמרא + שאלות אקטואליות + בסוף החוברת שאלות על הגמרא.</p>
+                </details>
+
+                <details class="faq-item">
+                    <summary>על מה יהיה חידון מידי שבוע?</summary>
+                    <p>רק על השאלות חזרה בסוף החוברת [לא יהיה חידון על השאלות אקטואליות].</p>
+                </details>
+
+                <details class="faq-item">
+                    <summary>פעם בכמה זמן יהיה חידון?</summary>
+                    <p>פעם בשבוע יתקיים חידון כאן באתר.</p>
+                </details>
+
+                <details class="faq-item">
+                    <summary>באיזה יום יתקיים החידון?</summary>
+                    <p>פעם בשבוע ביום שלישי או ביום אחר שהסניף פועל.</p>
+                </details>
+
+                <details class="faq-item">
+                    <summary>איך יבחרו הנערים שישאלו על ידי גדולי ישראל?</summary>
+                    <p>לקראת שבועות יתקיים חידון בכתב, ולאחר מכן יבחרו הנערים.</p>
+                </details>
+
+                <details class="faq-item">
+                    <summary>במה אפשר לזכות מידי שבוע?</summary>
+                    <p>בכל שבוע מבין כל אלו שיעברו את החידון תתקיים הגרלה על פרסים שווים.</p>
+                </details>
+            </div>
+        </section> -->
+
+        <!-- אזור הורדות -->
+        <section class="downloads-section animate-on-scroll" id="downloads-section">
+            <h2 class="section-title">
+                <span class="material-icons">download</span>
+                חומרי לימוד להורדה
+            </h2>
+            <!-- צפייה בחוברת -->
+            <!-- <div class="book-viewer-container">
+                <h3 class="viewer-title">
+                    <span class="material-icons">menu_book</span>
+                    צפייה בחוברת
+                </h3>
+                <div class="book-viewer">
+                    <iframe id="bookFrame" src="turn.js/hoveret/hoveret.html" frameborder="0" allowfullscreen
+                        title="חוברת מתיקות התורה">
+                    </iframe>
+                    <!-- <button class="expand-button" onclick="expandViewer()">
+                        <span class="material-icons">open_in_full</span>
+                    </button> -->
+                </div>
+            </div> -->
+
+            <!-- <div class="downloads-divider">או</div> -->
+
+            <div class="downloads-container">
+                <a href="assets/docs/hovert_ben_meitzarim.pdf" class="download-card" download>
+                    <div class="download-icon">
+                        <span class="material-icons">menu_book</span>
+                    </div>
+                    <div class="download-info">
+                        <h3>הורד את חוברת הלימוד</h3>
+                        <p>חוברת לימוד זמן קיץ - אגדות חז"ל - מתיקות התורה</p>
+                    </div>
+                    <span class="material-icons download-arrow">download</span>
+                </a>
+                <!-- <a href="assets/docs/milon_hamafkid.pdf" class="download-card" download>
+                    <div class="download-icon">
+                        <span class="material-icons">book</span>
+                    </div>
+                    <div class="download-info">
+                        <h3>הורד את ביאורי המילים</h3>
+                        <p>מילון מקיף למונחים בפרק המפקיד</p>
+                    </div>
+                    <span class="material-icons download-arrow">download</span>
+                </a> -->
+            </div>
+        </section>
+
+        <!-- אזור תמיכה -->
+        <section class="support-section animate-on-scroll">
+            <p class="support-text">לשאלות בנושא המיזם:</p>
+            <div class="support-contacts">
+                <a href="https://wa.me/972583730000" class="support-contact" target="_blank" rel="noopener">
+                    <span class="material-icons">forum</span>
+                    <span dir="ltr">058-373-0000</span>
+                </a>
+                <a href="tel:0548473336" class="support-contact">
+                    <span class="material-icons">phone</span>
+                    <span dir="ltr">054-847-3336</span>
+                </a>
+            </div>
+        </section>
+
+        <!-- אזור שיתוף -->
+        <section class="share-section animate-on-scroll">
+            <p class="share-text">אתם במיזם? אשריכם! אבל מה עם החברים?</p>
+            <button class="share-button ripple" onclick="shareWebsite()">
+                <span class="material-icons">share</span>
+                <span>שתפו את החברים במיזם</span>
+            </button>
+        </section>
+    </main>
+
+    <footer>
+        <p class="footer-credit" onclick="showContactInfo()">נבנה ע"י Y.D. Systems</p>
+    </footer>
+
+    <!-- וידאו JS -->
+    <script src="https://vjs.zencdn.net/8.5.2/video.min.js"></script>
+    <script>
+        // אתחול VideoJS כשהדף נטען
+        document.addEventListener('DOMContentLoaded', function() {
+            if (document.getElementById('carouselVideo')) {
+                const player = videojs('carouselVideo');
+                const overlay = document.querySelector('.video-card .ad-overlay');
+                
+                if (overlay) {
+                    overlay.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        player.play();
+                        overlay.style.opacity = '0';
+                        overlay.style.visibility = 'hidden';
+                    });
+                    
+                    player.on('ended', function() {
+                        overlay.style.opacity = '1';
+                        overlay.style.visibility = 'visible';
+                    });
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
