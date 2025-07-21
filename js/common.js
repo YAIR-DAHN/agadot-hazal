@@ -1,6 +1,7 @@
 // פונקציות משותפות כמו showModal, initDarkMode וכו' 
 
-const API_URL = 'https://script.google.com/macros/s/AKfycbwrymSQ5eqkBHshjFatcLicdLImpzY-RzbjC1xPbakRJ9Ufq9fdQu9BU1MdPa62AdDF/exec';
+// שימוש בקונפיגורציה המרכזית
+const API_URL = CONFIG.api.url;
 
 // קאש לנתונים
 const cache = {
@@ -52,10 +53,7 @@ async function fetchFromAPI(action, method = 'GET', data = null) {
         const text = await response.text();
         try {
             const jsonResponse = JSON.parse(text);
-            if (jsonResponse.error) {
-                throw new Error(jsonResponse.error);
-            }
-            return jsonResponse;
+            return jsonResponse; // החזרת התגובה גם אם יש שגיאה
         } catch (e) {
             console.error('Failed to parse response:', text);
             throw new Error('Invalid JSON response');

@@ -1,5 +1,4 @@
-// הגדרת API URL
-const API_BASE_URL = CONFIG.api.url;
+
 
 // טעינת רשימת הסניפים
 document.addEventListener('DOMContentLoaded', function() {
@@ -148,35 +147,7 @@ function showError(message) {
     }, 5000);
 }
 
-async function fetchFromAPI(action, method = 'GET', data = null) {
-    const url = new URL(API_BASE_URL);
-    url.searchParams.append('action', action);
-    
-    // תמיד נשתמש ב-GET ונעביר נתונים כפרמטרים בURL
-    if (data) {
-        url.searchParams.append('data', encodeURIComponent(JSON.stringify(data)));
-    }
-    
-    try {
-        const response = await fetch(url.toString(), {
-            method: 'GET'
-        });
-        const text = await response.text();
-        try {
-            const jsonResponse = JSON.parse(text);
-            if (jsonResponse.error) {
-                throw new Error(jsonResponse.error);
-            }
-            return jsonResponse;
-        } catch (e) {
-            console.error('Failed to parse response:', text);
-            throw new Error('Invalid JSON response');
-        }
-    } catch (error) {
-        console.error('Error fetching from API:', error);
-        throw error;
-    }
-}
+
 
 // פונקציה להצגת פרטי יצירת האתר
 function showContactInfo() {

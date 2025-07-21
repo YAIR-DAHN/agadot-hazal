@@ -1,7 +1,7 @@
 const CONFIG = {
     // הגדרות API
     api: {
-        url: 'https://script.google.com/macros/s/AKfycbwrymSQ5eqkBHshjFatcLicdLImpzY-RzbjC1xPbakRJ9Ufq9fdQu9BU1MdPa62AdDF/exec'
+        url: 'https://script.google.com/macros/s/AKfycbz1SAcHsW2c5UUqA2K-PgbLCwG6Lda75bsfj9G3i3qyp8rAxv3TET3gZ-YCA0_5pIKS/exec'
     },
 
     // הגדרות חידון לא עובד מכאן
@@ -25,4 +25,9 @@ const CONFIG = {
 };
 
 // מניעת שינויים בקונפיגורציה
-Object.freeze(CONFIG); 
+Object.freeze(CONFIG);
+
+// ייצוא הקונפיגורציה לשימוש בקבצים אחרים
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = CONFIG;
+} 

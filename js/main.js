@@ -1,4 +1,5 @@
-const API_URL = 'https://script.google.com/macros/s/AKfycbwrymSQ5eqkBHshjFatcLicdLImpzY-RzbjC1xPbakRJ9Ufq9fdQu9BU1MdPa62AdDF/exec';
+// שימוש בקונפיגורציה המרכזית
+const API_URL = CONFIG.api.url;
 
 // קאש לנתונים
 const cache = {

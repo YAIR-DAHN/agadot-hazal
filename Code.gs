@@ -8,6 +8,7 @@ const UPDATES_SHEET_NAME = 'עדכונים';
 const REGISTRATION_SHEET_NAME = 'רישום'; // גיליון חדש לרישום
 const PODCAST_LOTTERY_SHEET_NAME = 'פודקאסט הגרלה';
 const PODCAST_LISTENS_SHEET_NAME = 'האזנות פודקאסט';
+const DISCUSSION_COMMENTS_SHEET_NAME = 'תגובות דיון';
 
 function doGet(e) {
   const response = ContentService.createTextOutput()
@@ -104,6 +105,44 @@ function handleRequest(e) {
     case 'getUpdates':
       return getUpdates();
       
+    case 'submitDiscussionComment':
+      if (!data) {
+        return { error: 'No data provided' };
+      }
+      const commentResult = submitDiscussionComment(data.comment);
+      if (!commentResult.success) {
+        return { error: commentResult.error || 'Failed to submit comment' };
+      }
+      return commentResult;
+      
+    case 'submitDiscussionReply':
+      console.log("Received submitDiscussionReply request with data:", JSON.stringify(data));
+      if (!data) {
+        return { error: 'No data provided' };
+      }
+      console.log("Calling submitDiscussionReply with:", JSON.stringify(data.reply));
+      const replyResult = submitDiscussionReply(data.reply);
+      console.log("submitDiscussionReply result:", JSON.stringify(replyResult));
+      if (!replyResult.success) {
+        return { error: replyResult.error || 'Failed to submit reply' };
+      }
+      return replyResult;
+      
+    case 'likeComment':
+      if (!data || !data.commentId) {
+        return { error: 'No comment ID provided' };
+      }
+      return likeComment(data.commentId);
+      
+    case 'unlikeComment':
+      if (!data || !data.commentId) {
+        return { error: 'No comment ID provided' };
+      }
+      return unlikeComment(data.commentId);
+      
+    case 'getDiscussionComments':
+      return getDiscussionComments();
+      
     default:
       return {
         error: 'Invalid action'
@@ -117,7 +156,7 @@ function doPost(e) {
     .setMimeType(ContentService.MimeType.JSON)
     .setContent(JSON.stringify(handleRequest(e)));
   
-  return addCorsHeaders(response);
+  return response;
 }
 
 // פונקציה להחזרת רשימת הסניפים
@@ -127,13 +166,13 @@ function getBranches() {
   return branches.flat().filter(branch => branch !== '');
 }
 
-// פונקציה להחזרת השאלות לחידון הנוכחי
+// פונקציה להחזרת השאלות למבחן הנוכחי
 function getCurrentQuestions() {
   const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(QUESTIONS_SHEET_NAME);
   const data = sheet.getDataRange().getValues();
   const headers = data[0];
   
-  // מחזיר רק שאלות פעילות לחידון הנוכחי
+  // מחזיר רק שאלות פעילות למבחן הנוכחי
   const questions = data.slice(1)
     .filter(row => row[headers.indexOf('פעיל')] === true)
     .map(row => ({
@@ -197,7 +236,7 @@ function submitQuiz(userDetails, answers) {
     console.error('Error saving quiz:', error);
     return {
       success: false,
-      error: 'שגיאה בשמירת החידון'
+      error: 'שגיאה בשמירת המבחן'
     };
   }
 }
@@ -494,6 +533,14 @@ function setupSpreadsheet() {
     podcastListensSheet.setFrozenRows(1);
   }
   
+  // הגדרת גיליון תגובות דיון
+  let discussionCommentsSheet = ss.getSheetByName(DISCUSSION_COMMENTS_SHEET_NAME);
+  if (!discussionCommentsSheet) {
+    discussionCommentsSheet = ss.insertSheet(DISCUSSION_COMMENTS_SHEET_NAME);
+    discussionCommentsSheet.getRange('A1:E1').setValues([['תאריך', 'שם', 'תגובה', 'מזהה', 'זמן יצירה']]);
+    discussionCommentsSheet.setFrozenRows(1);
+  }
+  
   return "Spreadsheet setup completed";
 }
 
@@ -536,4 +583,298 @@ function getUpdates() {
     }));
   
   return { data: updates };
-} 
+}
+
+// פונקציה לשמירת תגובות דיון
+function submitDiscussionComment(comment) {
+  console.log("קבלת בקשת תגובת דיון:", JSON.stringify(comment));
+  
+  if (!comment || !comment.name || !comment.phone || !comment.text) {
+    console.error("חסרים פרטי תגובה:", JSON.stringify(comment));
+    return {
+      success: false,
+      error: 'חסרים פרטי תגובה נדרשים'
+    };
+  }
+
+  try {
+    // בדיקה אם קיים גיליון תגובות דיון, ואם לא - יוצרים אותו
+    let ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    let commentsSheet = ss.getSheetByName(DISCUSSION_COMMENTS_SHEET_NAME);
+    
+    if (!commentsSheet) {
+      console.log("יוצר גיליון תגובות דיון חדש");
+      commentsSheet = ss.insertSheet(DISCUSSION_COMMENTS_SHEET_NAME);
+      commentsSheet.getRange('A1:G1').setValues([
+        ['תאריך', 'שם', 'טלפון', 'תגובה', 'מזהה', 'זמן יצירה', 'תגובה על']
+      ]);
+      commentsSheet.setFrozenRows(1);
+    }
+    
+    const timestamp = new Date();
+    const commentId = Date.now().toString();
+    console.log("הוספת תגובה חדשה עבור:", comment.name);
+    
+    // שמירת התגובה
+    commentsSheet.appendRow([
+      timestamp,
+      comment.name,
+      comment.phone,
+      comment.text,
+      commentId,
+      timestamp.getTime(),
+      '' // עמודה G ריקה לתגובות רגילות
+    ]);
+    
+    console.log("תגובה נשמרה בהצלחה");
+    return {
+      success: true,
+      message: 'תגובתך נשלחה בהצלחה',
+      commentId: commentId
+    };
+  } catch (error) {
+    console.error('שגיאת שמירת תגובה:', error.toString());
+    return {
+      success: false,
+      error: 'שגיאה בשמירת התגובה: ' + error.toString()
+    };
+  }
+}
+
+// פונקציה לקבלת תגובות דיון
+function getDiscussionComments() {
+  try {
+    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    const commentsSheet = ss.getSheetByName(DISCUSSION_COMMENTS_SHEET_NAME);
+    
+    if (!commentsSheet) {
+      return { data: [] };
+    }
+    
+    const data = commentsSheet.getDataRange().getValues();
+    if (data.length <= 1) {
+      return { data: [] };
+    }
+    
+    const headers = data[0];
+    console.log('Headers:', headers);
+    console.log('Data rows:', data.slice(1));
+    
+    const comments = data.slice(1)
+      .map(row => {
+        console.log('Processing row:', row);
+        
+        // בדיקה אם השורה ריקה
+        if (!row[0] && !row[1] && !row[2]) {
+          console.log('Skipping empty row');
+          return null;
+        }
+        
+        // מבנה חדש: עמודה A = תאריך, עמודה B = שם, עמודה C = טלפון, עמודה D = תגובה, עמודה E = מזהה, עמודה F = זמן יצירה, עמודה G = תגובה על
+        const timestamp = row[0]; // עמודה A
+        const name = row[1]; // עמודה B  
+        const phone = row[2]; // עמודה C
+        const text = row[3]; // עמודה D
+        const commentId = row[4]; // עמודה E
+        const creationTime = row[5]; // עמודה F (זמן יצירה)
+        const replyTo = row[6]; // עמודה G (תגובה על)
+        
+        console.log('Extracted data:', { name, text, commentId, timestamp });
+        
+        // בדיקה אם יש תוכן
+        if (!name || !text) {
+          console.log('Skipping row without name or text');
+          return null;
+        }
+        
+        let formattedDate = 'תאריך לא ידוע';
+        
+        try {
+          if (timestamp) {
+            // אם זה כבר מחרוזת בפורמט עברי, נשתמש בה
+            if (typeof timestamp === 'string' && timestamp.includes('/')) {
+              formattedDate = timestamp;
+            } else {
+              // אחרת ננסה לפרסר כ-Date object
+              const date = new Date(timestamp);
+              if (!isNaN(date.getTime())) {
+                formattedDate = date.toLocaleString('he-IL', {
+                  year: 'numeric',
+                  month: '2-digit',
+                  day: '2-digit',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                });
+              }
+            }
+          }
+        } catch (error) {
+          console.error('שגיאה בעיצוב תאריך:', error);
+        }
+        
+        // בדוק אם יש עמודת לייקים
+        const likes = row[7] || 0; // עמודה H - לייקים
+        
+        return {
+          id: commentId || Date.now().toString(),
+          name: name,
+          text: text,
+          date: formattedDate,
+          timestamp: timestamp ? (typeof timestamp === 'string' ? new Date(timestamp).getTime() : timestamp.getTime()) : Date.now(),
+          replyTo: replyTo || null,
+          likes: likes
+        };
+      })
+      .filter(comment => comment !== null) // הסרת שורות ריקות
+      .sort((a, b) => b.timestamp - a.timestamp); // מיון לפי זמן (חדש קודם)
+    
+    console.log('Final comments:', comments);
+    return { data: comments };
+  } catch (error) {
+    console.error('שגיאה בקבלת תגובות:', error);
+    return { 
+      success: false, 
+      error: 'שגיאה בקבלת התגובות: ' + error.toString(),
+      data: [] 
+    };
+  }
+}
+
+// פונקציה לשמירת תגובות על תגובות
+function submitDiscussionReply(reply) {
+  console.log("קבלת בקשת תגובה על תגובה:", JSON.stringify(reply));
+  
+  if (!reply || !reply.name || !reply.phone || !reply.text || !reply.replyTo) {
+    console.error("חסרים פרטי תגובה:", JSON.stringify(reply));
+    return {
+      success: false,
+      error: 'חסרים פרטי תגובה נדרשים'
+    };
+  }
+
+  try {
+    // בדיקה אם קיים גיליון תגובות דיון
+    let ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    let commentsSheet = ss.getSheetByName(DISCUSSION_COMMENTS_SHEET_NAME);
+    
+    if (!commentsSheet) {
+      console.log("יוצר גיליון תגובות דיון חדש");
+      commentsSheet = ss.insertSheet(DISCUSSION_COMMENTS_SHEET_NAME);
+      commentsSheet.getRange('A1:G1').setValues([
+        ['תאריך', 'שם', 'טלפון', 'תגובה', 'מזהה', 'זמן יצירה', 'תגובה על']
+      ]);
+      commentsSheet.setFrozenRows(1);
+    }
+    
+    const timestamp = new Date();
+    const replyId = Date.now().toString();
+    console.log("הוספת תגובה חדשה עבור:", reply.name, "על תגובה:", reply.replyTo);
+    
+    // שמירת התגובה
+    commentsSheet.appendRow([
+      timestamp,
+      reply.name,
+      reply.phone,
+      reply.text,
+      replyId,
+      timestamp.getTime(),
+      reply.replyTo
+    ]);
+    
+    console.log("תגובה נשמרה בהצלחה");
+    return {
+      success: true,
+      message: 'תגובתך נשלחה בהצלחה',
+      replyId: replyId
+    };
+  } catch (error) {
+    console.error('שגיאת שמירת תגובה:', error.toString());
+    return {
+      success: false,
+      error: 'שגיאה בשמירת התגובה: ' + error.toString()
+    };
+  }
+}
+
+// פונקציה ללייק תגובה
+function likeComment(commentId) {
+  try {
+    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    const commentsSheet = ss.getSheetByName(DISCUSSION_COMMENTS_SHEET_NAME);
+    
+    if (!commentsSheet) {
+      return { success: false, error: 'גיליון תגובות לא נמצא' };
+    }
+    
+    const data = commentsSheet.getDataRange().getValues();
+    const headers = data[0];
+    
+    // מצא את השורה עם ה-ID המתאים
+    for (let i = 1; i < data.length; i++) {
+      const row = data[i];
+      const rowCommentId = row[4]; // עמודה E - מזהה
+      
+      if (rowCommentId.toString() === commentId.toString()) {
+        // בדוק אם יש עמודת לייקים, אם לא - הוסף אותה
+        let likesColumnIndex = headers.indexOf('לייקים');
+        if (likesColumnIndex === -1) {
+          likesColumnIndex = headers.length;
+          commentsSheet.getRange(1, likesColumnIndex + 1).setValue('לייקים');
+        }
+        
+        // עדכן את מספר הלייקים
+        const currentLikes = row[likesColumnIndex] || 0;
+        const newLikes = currentLikes + 1;
+        commentsSheet.getRange(i + 1, likesColumnIndex + 1).setValue(newLikes);
+        
+        return { success: true, likes: newLikes };
+      }
+    }
+    
+    return { success: false, error: 'תגובה לא נמצאה' };
+  } catch (error) {
+    console.error('שגיאה בלייק תגובה:', error);
+    return { success: false, error: 'שגיאה בעדכון הלייק' };
+  }
+}
+
+// פונקציה לביטול לייק תגובה
+function unlikeComment(commentId) {
+  try {
+    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    const commentsSheet = ss.getSheetByName(DISCUSSION_COMMENTS_SHEET_NAME);
+    
+    if (!commentsSheet) {
+      return { success: false, error: 'גיליון תגובות לא נמצא' };
+    }
+    
+    const data = commentsSheet.getDataRange().getValues();
+    const headers = data[0];
+    
+    // מצא את השורה עם ה-ID המתאים
+    for (let i = 1; i < data.length; i++) {
+      const row = data[i];
+      const rowCommentId = row[4]; // עמודה E - מזהה
+      
+      if (rowCommentId.toString() === commentId.toString()) {
+        // בדוק אם יש עמודת לייקים
+        let likesColumnIndex = headers.indexOf('לייקים');
+        if (likesColumnIndex === -1) {
+          return { success: false, error: 'עמודת לייקים לא קיימת' };
+        }
+        
+        // עדכן את מספר הלייקים
+        const currentLikes = row[likesColumnIndex] || 0;
+        const newLikes = Math.max(0, currentLikes - 1);
+        commentsSheet.getRange(i + 1, likesColumnIndex + 1).setValue(newLikes);
+        
+        return { success: true, likes: newLikes };
+      }
+    }
+    
+    return { success: false, error: 'תגובה לא נמצאה' };
+  } catch (error) {
+    console.error('שגיאה בביטול לייק תגובה:', error);
+    return { success: false, error: 'שגיאה בעדכון הלייק' };
+  }
+}
