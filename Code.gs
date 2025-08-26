@@ -141,7 +141,7 @@ function handleRequest(e) {
       return unlikeComment(data.commentId);
       
     case 'getDiscussionComments':
-      return getDiscussionComments();
+      return getDiscussionComments(e);
       
     default:
       return {
@@ -537,7 +537,7 @@ function setupSpreadsheet() {
   let discussionCommentsSheet = ss.getSheetByName(DISCUSSION_COMMENTS_SHEET_NAME);
   if (!discussionCommentsSheet) {
     discussionCommentsSheet = ss.insertSheet(DISCUSSION_COMMENTS_SHEET_NAME);
-    discussionCommentsSheet.getRange('A1:E1').setValues([['תאריך', 'שם', 'תגובה', 'מזהה', 'זמן יצירה']]);
+    discussionCommentsSheet.getRange('A1:H1').setValues([['תאריך', 'שם', 'טלפון', 'תגובה', 'מזהה', 'זמן יצירה', 'תגובה על', 'מזהה דיון']]);
     discussionCommentsSheet.setFrozenRows(1);
   }
   
@@ -589,7 +589,7 @@ function getUpdates() {
 function submitDiscussionComment(comment) {
   console.log("קבלת בקשת תגובת דיון:", JSON.stringify(comment));
   
-  if (!comment || !comment.name || !comment.phone || !comment.text) {
+  if (!comment || !comment.name || !comment.phone || !comment.text || !comment.discussionId) {
     console.error("חסרים פרטי תגובה:", JSON.stringify(comment));
     return {
       success: false,
@@ -605,15 +605,15 @@ function submitDiscussionComment(comment) {
     if (!commentsSheet) {
       console.log("יוצר גיליון תגובות דיון חדש");
       commentsSheet = ss.insertSheet(DISCUSSION_COMMENTS_SHEET_NAME);
-      commentsSheet.getRange('A1:G1').setValues([
-        ['תאריך', 'שם', 'טלפון', 'תגובה', 'מזהה', 'זמן יצירה', 'תגובה על']
+      commentsSheet.getRange('A1:H1').setValues([
+        ['תאריך', 'שם', 'טלפון', 'תגובה', 'מזהה', 'זמן יצירה', 'תגובה על', 'מזהה דיון']
       ]);
       commentsSheet.setFrozenRows(1);
     }
     
     const timestamp = new Date();
     const commentId = Date.now().toString();
-    console.log("הוספת תגובה חדשה עבור:", comment.name);
+    console.log("הוספת תגובה חדשה עבור:", comment.name, "בדיון:", comment.discussionId);
     
     // שמירת התגובה
     commentsSheet.appendRow([
@@ -623,7 +623,8 @@ function submitDiscussionComment(comment) {
       comment.text,
       commentId,
       timestamp.getTime(),
-      '' // עמודה G ריקה לתגובות רגילות
+      '', // עמודה G ריקה לתגובות רגילות
+      comment.discussionId // עמודה H - מזהה הדיון
     ]);
     
     console.log("תגובה נשמרה בהצלחה");
@@ -642,7 +643,7 @@ function submitDiscussionComment(comment) {
 }
 
 // פונקציה לקבלת תגובות דיון
-function getDiscussionComments() {
+function getDiscussionComments(e) {
   try {
     const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
     const commentsSheet = ss.getSheetByName(DISCUSSION_COMMENTS_SHEET_NAME);
@@ -660,6 +661,10 @@ function getDiscussionComments() {
     console.log('Headers:', headers);
     console.log('Data rows:', data.slice(1));
     
+    // קבלת מזהה הדיון מהפרמטרים
+    const discussionId = e && e.parameter ? e.parameter.discussionId : null;
+    console.log('Requested discussion ID:', discussionId);
+    
     const comments = data.slice(1)
       .map(row => {
         console.log('Processing row:', row);
@@ -670,7 +675,7 @@ function getDiscussionComments() {
           return null;
         }
         
-        // מבנה חדש: עמודה A = תאריך, עמודה B = שם, עמודה C = טלפון, עמודה D = תגובה, עמודה E = מזהה, עמודה F = זמן יצירה, עמודה G = תגובה על
+        // מבנה חדש: עמודה A = תאריך, עמודה B = שם, עמודה C = טלפון, עמודה D = תגובה, עמודה E = מזהה, עמודה F = זמן יצירה, עמודה G = תגובה על, עמודה H = מזהה דיון
         const timestamp = row[0]; // עמודה A
         const name = row[1]; // עמודה B  
         const phone = row[2]; // עמודה C
@@ -678,12 +683,19 @@ function getDiscussionComments() {
         const commentId = row[4]; // עמודה E
         const creationTime = row[5]; // עמודה F (זמן יצירה)
         const replyTo = row[6]; // עמודה G (תגובה על)
+        const rowDiscussionId = row[7]; // עמודה H (מזהה דיון)
         
-        console.log('Extracted data:', { name, text, commentId, timestamp });
+        console.log('Extracted data:', { name, text, commentId, timestamp, discussionId: rowDiscussionId });
         
         // בדיקה אם יש תוכן
         if (!name || !text) {
           console.log('Skipping row without name or text');
+          return null;
+        }
+        
+        // סינון לפי מזהה הדיון
+        if (discussionId && rowDiscussionId !== discussionId) {
+          console.log('Skipping comment from different discussion:', rowDiscussionId, '!=', discussionId);
           return null;
         }
         
@@ -713,7 +725,7 @@ function getDiscussionComments() {
         }
         
         // בדוק אם יש עמודת לייקים
-        const likes = row[7] || 0; // עמודה H - לייקים
+        const likes = row[8] || 0; // עמודה I - לייקים (עכשיו אחרי עמודת מזהה דיון)
         
         return {
           id: commentId || Date.now().toString(),
@@ -722,13 +734,14 @@ function getDiscussionComments() {
           date: formattedDate,
           timestamp: timestamp ? (typeof timestamp === 'string' ? new Date(timestamp).getTime() : timestamp.getTime()) : Date.now(),
           replyTo: replyTo || null,
-          likes: likes
+          likes: likes,
+          discussionId: rowDiscussionId
         };
       })
       .filter(comment => comment !== null) // הסרת שורות ריקות
       .sort((a, b) => b.timestamp - a.timestamp); // מיון לפי זמן (חדש קודם)
     
-    console.log('Final comments:', comments);
+    console.log('Final comments for discussion', discussionId, ':', comments);
     return { data: comments };
   } catch (error) {
     console.error('שגיאה בקבלת תגובות:', error);
@@ -740,11 +753,13 @@ function getDiscussionComments() {
   }
 }
 
+
+
 // פונקציה לשמירת תגובות על תגובות
 function submitDiscussionReply(reply) {
   console.log("קבלת בקשת תגובה על תגובה:", JSON.stringify(reply));
   
-  if (!reply || !reply.name || !reply.phone || !reply.text || !reply.replyTo) {
+  if (!reply || !reply.name || !reply.phone || !reply.text || !reply.replyTo || !reply.discussionId) {
     console.error("חסרים פרטי תגובה:", JSON.stringify(reply));
     return {
       success: false,
@@ -760,15 +775,15 @@ function submitDiscussionReply(reply) {
     if (!commentsSheet) {
       console.log("יוצר גיליון תגובות דיון חדש");
       commentsSheet = ss.insertSheet(DISCUSSION_COMMENTS_SHEET_NAME);
-      commentsSheet.getRange('A1:G1').setValues([
-        ['תאריך', 'שם', 'טלפון', 'תגובה', 'מזהה', 'זמן יצירה', 'תגובה על']
+      commentsSheet.getRange('A1:H1').setValues([
+        ['תאריך', 'שם', 'טלפון', 'תגובה', 'מזהה', 'זמן יצירה', 'תגובה על', 'מזהה דיון']
       ]);
       commentsSheet.setFrozenRows(1);
     }
     
     const timestamp = new Date();
     const replyId = Date.now().toString();
-    console.log("הוספת תגובה חדשה עבור:", reply.name, "על תגובה:", reply.replyTo);
+    console.log("הוספת תגובה חדשה עבור:", reply.name, "על תגובה:", reply.replyTo, "בדיון:", reply.discussionId);
     
     // שמירת התגובה
     commentsSheet.appendRow([
@@ -778,7 +793,8 @@ function submitDiscussionReply(reply) {
       reply.text,
       replyId,
       timestamp.getTime(),
-      reply.replyTo
+      reply.replyTo,
+      reply.discussionId // עמודה H - מזהה הדיון
     ]);
     
     console.log("תגובה נשמרה בהצלחה");

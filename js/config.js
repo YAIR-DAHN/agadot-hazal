@@ -1,7 +1,7 @@
 const CONFIG = {
     // הגדרות API
     api: {
-        url: 'https://script.google.com/macros/s/AKfycbz1SAcHsW2c5UUqA2K-PgbLCwG6Lda75bsfj9G3i3qyp8rAxv3TET3gZ-YCA0_5pIKS/exec'
+        url: 'https://script.google.com/macros/s/AKfycbwNM4iw40-bs7qsG55gOUJWDyERpzAqKkG91I_CqjBBL_oXRmpwb9ghzHOghsfQFM4/exec'
     },
 
     // הגדרות חידון לא עובד מכאן

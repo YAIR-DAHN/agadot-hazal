@@ -15,12 +15,22 @@ class Carousel {
     }
     
     init() {
+        // בדיקה שהאלמנטים קיימים לפני הוספת מאזיני אירועים
+        if (!this.slides || !this.slideElements.length) {
+            console.warn('Carousel: No slides found');
+            return;
+        }
+        
         // יצירת נקודות ניווט
         this.createDots();
         
-        // הוספת מאזיני אירועים
-        this.prevButton.addEventListener('click', () => this.prevSlide());
-        this.nextButton.addEventListener('click', () => this.nextSlide());
+        // הוספת מאזיני אירועים רק אם הכפתורים קיימים
+        if (this.prevButton) {
+            this.prevButton.addEventListener('click', () => this.prevSlide());
+        }
+        if (this.nextButton) {
+            this.nextButton.addEventListener('click', () => this.nextSlide());
+        }
         
         // התחלת גלילה אוטומטית
         this.startAutoPlay();
@@ -34,6 +44,11 @@ class Carousel {
     }
     
     createDots() {
+        if (!this.dotsContainer) {
+            console.warn('Carousel: No dots container found');
+            return;
+        }
+        
         for (let i = 0; i < this.slideCount; i++) {
             const dot = document.createElement('div');
             dot.className = 'carousel-dot';
@@ -55,11 +70,13 @@ class Carousel {
             slide.classList.toggle('active', index === this.currentSlide);
         });
         
-        // עדכון נקודות הניווט
-        const dots = this.dotsContainer.querySelectorAll('.carousel-dot');
-        dots.forEach((dot, index) => {
-            dot.classList.toggle('active', index === this.currentSlide);
-        });
+        // עדכון נקודות הניווט רק אם ה-dotsContainer קיים
+        if (this.dotsContainer) {
+            const dots = this.dotsContainer.querySelectorAll('.carousel-dot');
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index === this.currentSlide);
+            });
+        }
     }
     
     nextSlide() {
@@ -89,7 +106,11 @@ class Carousel {
 document.addEventListener('DOMContentLoaded', () => {
     const carouselContainer = document.querySelector('.carousel-container');
     if (carouselContainer) {
-        new Carousel(carouselContainer);
+        try {
+            new Carousel(carouselContainer);
+        } catch (error) {
+            console.warn('Carousel initialization failed:', error);
+        }
     }
 });
 

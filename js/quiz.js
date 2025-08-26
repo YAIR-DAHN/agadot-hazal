@@ -54,8 +54,13 @@ async function startQuiz(userDetails) {
         document.getElementById('totalQuestions').textContent = currentQuestions.length;
 
         // הסתרת טופס ההרשמה והצגת החידון
-        document.getElementById('registration-form').classList.add('hidden');
-        document.getElementById('quiz-section').classList.remove('hidden');
+        const registrationForm = document.getElementById('registration-form');
+        const quizSection = document.getElementById('quiz-section');
+        
+        console.log('Hiding registration form, showing quiz section');
+        registrationForm.style.display = 'none';
+        quizSection.style.display = 'block';
+        quizSection.classList.remove('hidden');
 
         // הצגת השאלה הראשונה
         showQuestion(0);
@@ -211,12 +216,21 @@ async function submitQuizToServer() {
 }
 
 function createQuestionIndicators() {
+    // מחיקת אינדיקטורים קיימים אם יש
+    const existingContainer = document.querySelector('.questions-status');
+    if (existingContainer) {
+        existingContainer.remove();
+    }
+    
     const container = document.createElement('div');
     container.className = 'questions-status';
     
     for (let i = 0; i < currentQuestions.length; i++) {
         const indicator = document.createElement('div');
         indicator.className = 'question-indicator';
+        if (i === 0) {
+            indicator.classList.add('current');
+        }
         indicator.addEventListener('click', () => {
             saveCurrentAnswer();
             currentQuestionIndex = i;
@@ -226,14 +240,18 @@ function createQuestionIndicators() {
     }
     
     document.querySelector('.progress-container').after(container);
-    updateQuestionIndicators();
 }
 
 function updateQuestionIndicators() {
     const indicators = document.querySelectorAll('.question-indicator');
     indicators.forEach((indicator, index) => {
-        indicator.classList.toggle('answered', userAnswers[index] !== null);
-        indicator.classList.toggle('current', index === currentQuestionIndex);
+        indicator.classList.remove('answered', 'current');
+        if (userAnswers[index] !== null) {
+            indicator.classList.add('answered');
+        }
+        if (index === currentQuestionIndex) {
+            indicator.classList.add('current');
+        }
     });
 }
 
@@ -295,12 +313,23 @@ function updateBranchList(branches) {
             branch.toLowerCase().includes(searchText.toLowerCase())
         );
 
+        console.log('Filtering branches:', searchText, 'Found:', filtered.length);
+
         resultsContainer.innerHTML = filtered.map(branch => `
             <div class="branch-option">
                 <span class="material-icons">location_on</span>
                 <span class="branch-name">${branch}</span>
             </div>
         `).join('');
+        
+        // הצגת או הסתרת הרשימה בהתאם לתוצאות
+        if (filtered.length > 0) {
+            resultsContainer.style.display = 'block';
+            console.log('Showing branch results');
+        } else {
+            resultsContainer.style.display = 'none';
+            console.log('Hiding branch results');
+        }
     }
 
     // מאזיני אירועים
@@ -320,6 +349,7 @@ function updateBranchList(branches) {
             const branchName = option.querySelector('.branch-name').textContent;
             input.value = branchName;
             resultsContainer.innerHTML = '';
+            resultsContainer.style.display = 'none';
             validateBranch(input);
         }
     });
@@ -328,6 +358,7 @@ function updateBranchList(branches) {
     document.addEventListener('click', (e) => {
         if (!e.target.closest('.branch-search-container')) {
             resultsContainer.innerHTML = '';
+            resultsContainer.style.display = 'none';
         }
     });
 }
@@ -435,8 +466,14 @@ function initializeEventListeners() {
             document.getElementById('cancel-quiz').addEventListener('click', () => {
                 document.getElementById('cancel-dialog').remove();
                 // חזרה לטופס ההרשמה
-                document.getElementById('quiz-section').classList.add('hidden');
-                document.getElementById('registration-form').classList.remove('hidden');
+                const quizSection = document.getElementById('quiz-section');
+                const registrationForm = document.getElementById('registration-form');
+                
+                quizSection.style.display = 'none';
+                quizSection.classList.add('hidden');
+                registrationForm.style.display = 'block';
+                registrationForm.classList.remove('hidden');
+                
                 // איפוס נתוני החידון
                 currentQuestions = [];
                 userAnswers = [];
@@ -478,20 +515,8 @@ function showQuestion(index) {
     document.getElementById('currentQuestion').textContent = index + 1;
     document.getElementById('totalQuestions').textContent = currentQuestions.length;
 
-    // יצירת או עדכון עיגולי התקדמות
-    const progressContainer = document.querySelector('.progress-container');
-    
-    // יצירת עיגולים רק אם הם לא קיימים
-    if (!progressContainer.querySelector('.progress-dot')) {
-        currentQuestions.forEach((_, i) => {
-            const dot = document.createElement('div');
-            dot.className = 'progress-dot';
-            progressContainer.appendChild(dot);
-        });
-    }
-    
-    // עדכון מצב העיגולים
-    const dots = progressContainer.querySelectorAll('.progress-dot');
+    // עדכון עיגולי התקדמות קיימים
+    const dots = document.querySelectorAll('.progress-dot');
     dots.forEach((dot, i) => {
         dot.className = 'progress-dot';
         if (i === index) {
@@ -501,6 +526,9 @@ function showQuestion(index) {
             dot.classList.add('completed');
         }
     });
+    
+    // עדכון אינדיקטורים
+    updateQuestionIndicators();
     
     // הוספת ההקדמה לפני השאלות הראשונות
     let introductionHTML = '';
@@ -537,9 +565,6 @@ function showQuestion(index) {
     const nextButton = document.getElementById('nextQuestion');
     const submitButton = document.getElementById('submitQuiz');
     
-    prevButton.innerHTML = `<span class="material-icons">arrow_forward</span>שאלה קודמת`;
-    nextButton.innerHTML = `שאלה הבאה<span class="material-icons">arrow_back</span>`;
-    
     // הסתרת הכפתורים
     if (index === 0) {
         prevButton.style.display = 'block';
@@ -548,13 +573,14 @@ function showQuestion(index) {
     } else {
         prevButton.style.display = 'block';
         prevButton.classList.remove('cancel-button');
-        prevButton.innerHTML = `<span class="material-icons">arrow_forward</span>שאלה קודמת`;
+        prevButton.innerHTML = `<span class="material-icons">arrow_forward</span>הקודמת`;
     }
     
     if (index === currentQuestions.length - 1) {
         nextButton.style.display = 'none';
     } else {
         nextButton.style.display = 'block';
+        nextButton.innerHTML = `הבאה<span class="material-icons">arrow_back</span>`;
     }
     
     submitButton.classList.toggle('hidden', index !== currentQuestions.length - 1);
@@ -579,8 +605,118 @@ function saveCurrentAnswer() {
     updateQuestionIndicators();
 }
 
+// פונקציות ניווט
+function nextQuestion() {
+    saveCurrentAnswer();
+    if (currentQuestionIndex < currentQuestions.length - 1) {
+        currentQuestionIndex++;
+        showQuestion(currentQuestionIndex);
+    }
+}
+
+function previousQuestion() {
+    saveCurrentAnswer();
+    if (currentQuestionIndex > 0) {
+        currentQuestionIndex--;
+        showQuestion(currentQuestionIndex);
+    }
+}
+
+// איפוס החידון
+function resetQuiz() {
+    currentQuestionIndex = 0;
+    userAnswers = new Array(currentQuestions.length).fill(null);
+    showQuestion(0);
+}
+
+// טעינת שאלות החידון
+async function loadQuestions() {
+    try {
+        showLoading();
+        const submitButton = document.querySelector('#userDetailsForm button[type="submit"]');
+        submitButton.disabled = true;
+        submitButton.classList.add('loading-button');
+        submitButton.innerHTML = '<div class="spinner"></div>אנא המתן...';
+
+        const response = await fetchFromAPI('getQuestions');
+        cache.questions = response.data;
+        
+        hideLoading();
+        submitButton.disabled = false;
+        submitButton.classList.remove('loading-button');
+        submitButton.innerHTML = 'התחל חידון';
+        
+        return response.data;
+    } catch (error) {
+        console.error('Error loading questions:', error);
+        showModal({
+            title: 'שגיאה',
+            message: 'אירעה שגיאה בטעינת השאלות. אנא נסה שוב מאוחר יותר.',
+            icon: 'error'
+        });
+        const submitButton = document.querySelector('#userDetailsForm button[type="submit"]');
+        submitButton.disabled = true;
+        submitButton.innerHTML = 'אירעה שגיאה';
+    }
+}
+
+// עדכון סרגל התקדמות
+function updateProgress() {
+    const progressBar = document.querySelector('.progress-bar');
+    const currentQuestionSpan = document.getElementById('currentQuestion');
+    const totalQuestionsSpan = document.getElementById('totalQuestions');
+    
+    const progress = ((currentQuestionIndex + 1) / currentQuestions.length) * 100;
+    progressBar.style.width = `${progress}%`;
+    
+    currentQuestionSpan.textContent = currentQuestionIndex + 1;
+    totalQuestionsSpan.textContent = currentQuestions.length;
+    
+    // עדכון עיגולי התקדמות קיימים במקום ליצור חדשים
+    const dots = document.querySelectorAll('.progress-dot');
+    dots.forEach((dot, index) => {
+        dot.className = 'progress-dot';
+        if (index === currentQuestionIndex) {
+            dot.classList.add('active');
+        }
+        if (index < currentQuestionIndex) {
+            dot.classList.add('completed');
+        }
+    });
+}
+
+// מעבר לשאלה הבאה
+function showNextQuestion() {
+    if (currentQuestionIndex < currentQuestions.length - 1) {
+        currentQuestionIndex++;
+        showQuestion(currentQuestionIndex);
+    }
+}
+
+// מעבר לשאלה הקודמת
+function showPreviousQuestion() {
+    if (currentQuestionIndex > 0) {
+        currentQuestionIndex--;
+        showQuestion(currentQuestionIndex);
+    }
+}
+
+// הצגת השאלה הנוכחית
+function showCurrentQuestion() {
+    showQuestion(currentQuestionIndex);
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     initDarkMode();
+
+    // וידוא שהטופס מוצג והחידון מוסתר בתחילת הטעינה
+    const registrationForm = document.getElementById('registration-form');
+    const quizSection = document.getElementById('quiz-section');
+    
+    registrationForm.style.display = 'block';
+    registrationForm.classList.remove('hidden');
+    quizSection.style.display = 'none';
+    quizSection.classList.add('hidden');
 
     // טיפול בהודעה לפני החידון
     if (CONFIG.quiz.showAnnouncement) {
@@ -640,10 +776,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         submitButton.classList.remove('loading-button');
         submitButton.innerHTML = 'התחל חידון';
 
-        // עדכון רשימת הסניפים בממשק
-        if (cache.branches) {
-            updateBranchList(cache.branches);
-        }
+            // עדכון רשימת הסניפים בממשק
+    if (cache.branches) {
+        console.log('Branches loaded:', cache.branches.length);
+        updateBranchList(cache.branches);
+    } else {
+        console.log('No branches loaded');
+    }
 
     } catch (error) {
         console.error('שגיאה באתחול:', error);
@@ -659,94 +798,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     // הוספת מאזיני אירועים
     initializeEventListeners();
 });
-
-// טעינת שאלות החידון
-async function loadQuestions() {
-    try {
-        showLoading();
-        const submitButton = document.querySelector('#userDetailsForm button[type="submit"]');
-        submitButton.disabled = true;
-        submitButton.classList.add('loading-button');
-        submitButton.innerHTML = '<div class="spinner"></div>אנא המתן...';
-
-        const response = await fetchFromAPI('getQuestions');
-        cache.questions = response.questions;
-        
-        hideLoading();
-        submitButton.disabled = false;
-        submitButton.classList.remove('loading-button');
-        submitButton.innerHTML = 'התחל חידון';
-        
-        return response.questions;
-    } catch (error) {
-        console.error('Error loading questions:', error);
-        showModal({
-            title: 'שגיאה',
-            message: 'אירעה שגיאה בטעינת השאלות. אנא נסה שוב מאוחר יותר.',
-            icon: 'error'
-        });
-        const submitButton = document.querySelector('#userDetailsForm button[type="submit"]');
-        submitButton.disabled = true;
-        submitButton.innerHTML = 'אירעה שגיאה';
-    }
-}
-
-// עדכון סרגל התקדמות
-function updateProgress() {
-    // מחיקת עיגולי התקדמות קיימים
-    const existingDots = document.querySelectorAll('.progress-dot');
-    existingDots.forEach(dot => dot.remove());
-
-    const progressBar = document.querySelector('.progress-bar');
-    const currentQuestionSpan = document.getElementById('currentQuestion');
-    const totalQuestionsSpan = document.getElementById('totalQuestions');
-    
-    const progress = ((currentQuestionIndex + 1) / currentQuestions.length) * 100;
-    progressBar.style.width = `${progress}%`;
-    
-    currentQuestionSpan.textContent = currentQuestionIndex + 1;
-    totalQuestionsSpan.textContent = currentQuestions.length;
-    
-    // יצירת עיגולי התקדמות חדשים
-    const progressContainer = document.querySelector('.progress-container');
-    currentQuestions.forEach((_, index) => {
-        const dot = document.createElement('div');
-        dot.className = `progress-dot ${index === currentQuestionIndex ? 'active' : ''}`;
-        if (index < currentQuestionIndex) {
-            dot.classList.add('completed');
-        }
-        progressContainer.appendChild(dot);
-    });
-}
-
-// מעבר לשאלה הבאה
-function showNextQuestion() {
-    if (currentQuestionIndex < currentQuestions.length - 1) {
-        currentQuestionIndex++;
-        showCurrentQuestion();
-        updateProgress();
-    }
-}
-
-// מעבר לשאלה הקודמת
-function showPreviousQuestion() {
-    if (currentQuestionIndex > 0) {
-        currentQuestionIndex--;
-        showCurrentQuestion();
-        updateProgress();
-    }
-}
-
-// איפוס החידון
-function resetQuiz() {
-    currentQuestionIndex = 0;
-    userAnswers = {};
-    const progressContainer = document.querySelector('.progress-container');
-    progressContainer.innerHTML = '<div class="progress-bar"></div>' +
-        '<span class="progress-text">שאלה <span id="currentQuestion">1</span> מתוך <span id="totalQuestions">10</span></span>';
-    showCurrentQuestion();
-    updateProgress();
-}
 
 // הוספת סגנונות לדיאלוגים המותאמים אישית
 const customDialogStyles = `

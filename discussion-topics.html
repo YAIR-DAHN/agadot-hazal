@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="נושאי דיון - תנועת הנוער אור ישראלי">
+    <meta property="og:title" content="נושאי דיון - תנועת הנוער אור ישראלי">
+    <meta property="og:description" content="בחר נושא לדיון בנושאי בין אדם לחברו">
+    <meta property="og:image" content="./assets/logos/or-israeli-logo.png">
+    <meta name="theme-color" content="#4A90E2" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#4A90E2" media="(prefers-color-scheme: dark)">
+    <meta name="msapplication-navbutton-color" content="#4A90E2">
+    <meta name="apple-mobile-web-app-status-bar-style" content="#4A90E2">
+
+    <link rel="icon" type="image/png" href="./assets/logos/or-israeli-logo.png">
+    <link rel="apple-touch-icon" href="./assets/logos/or-israeli-logo.png">
+
+    <title>נושאי דיון - תנועת הנוער אור ישראלי</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dark-mode.css">
+    <script src="js/config.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/animations.js"></script>
+</head>
+
+<body>
+    <div id="loading" class="loading hidden">
+        <div class="spinner"></div>
+        <p>טוען...</p>
+    </div>
+    
+    <header class="modern-header">
+        <div class="header-content">
+            <div class="logo-container">
+                <div class="main-logo">
+                    <img src="assets/logos/or-israeli-logo.png" alt="אור ישראלי">
+                </div>
+                <!-- <div class="logo-text">
+                    <h2>תנועת הנוער אור ישראלי</h2>
+                    <p>רב יצחק דוד גרוסמן פרס ישראל</p>
+                    <p>תנועת נוער בערכי היהדות</p>
+                </div> -->
+            </div>
+        </div>
+    </header>
+
+    <main class="modern-main">
+        <!-- כפתור חזרה -->
+        <div class="back-button-container">
+            <a href="index.html" class="back-button">
+                <span class="material-icons">arrow_back</span>
+                חזרה לדף הבית
+            </a>
+        </div>
+
+        <!-- כותרת הדף -->
+        <section class="page-hero animate-on-scroll">
+            <div class="page-hero-content">
+                <h1 class="page-title">
+                    <span class="title-icon">💬</span>
+                    נושאי דיון
+                </h1>
+                <p class="page-subtitle">בחר נושא לדיון בנושאי בין אדם לחברו</p>
+            </div>
+        </section>
+
+        <!-- רשימת נושאי הדיון -->
+        <section class="topics-section animate-on-scroll">
+            <div class="topics-grid">
+                <!-- נושא ראשון - מכנה שם לחברו -->
+                <article class="topic-card animate-on-scroll">
+                    <div class="topic-image">
+                        <img src="assets/images/kinuy-shem.png" alt="ילד מבויש" class="topic-img">
+                    </div>
+                    <div class="topic-content">
+                        <h2 class="topic-title">מכנה שם לחברו</h2>
+                        <p class="topic-description">
+                            דיון על האיסור לכנות שם לחברו, מתי זה מותר ומתי אסור, 
+                            וההבדל בין כינוי גנאי לכינוי כבוד.
+                        </p>
+                        <div class="topic-meta">
+                            <span class="topic-category">בין אדם לחברו</span>
+                            <span class="topic-participants">👥 דיון קבוצתי</span>
+                        </div>
+                        <a href="discussion.html" class="topic-button">
+                            <span class="material-icons">forum</span>
+                            הצטרף לדיון
+                        </a>
+                    </div>
+                </article>
+
+                <!-- נושא שני - דוגמה לנושא נוסף -->
+                <article class="topic-card animate-on-scroll">
+                    <div class="topic-image">
+                        <img src="assets/png/boy-salutes.png" alt="ילד מחווה סלוט" class="topic-img">
+                    </div>
+                    <div class="topic-content">
+                        <h2 class="topic-title">כבוד הזולת</h2>
+                        <p class="topic-description">
+                            חשיבות כבוד הזולת בחיי היומיום, איך להתייחס לאחרים 
+                            וכיצד לשמור על כבוד הדדי.
+                        </p>
+                        <div class="topic-meta">
+                            <span class="topic-category">בין אדם לחברו</span>
+                            <span class="topic-participants">👥 דיון קבוצתי</span>
+                        </div>
+                        <a href="#" class="topic-button disabled">
+                            <span class="material-icons">schedule</span>
+                            בקרוב
+                        </a>
+                    </div>
+                </article>
+
+                <!-- נושא שלישי - דוגמה לנושא נוסף -->
+                <!-- <article class="topic-card animate-on-scroll">
+                    <div class="topic-image">
+                        <img src="assets/png/buy-happy.png" alt="ילד מחייך" class="topic-img">
+                    </div>
+                    <div class="topic-content">
+                        <h2 class="topic-title">עזרה לזולת</h2>
+                        <p class="topic-description">
+                            חשיבות העזרה לזולת, מתי ואיך לעזור לאחרים, 
+                            והשפעת הנתינה על החברה.
+                        </p>
+                        <div class="topic-meta">
+                            <span class="topic-category">בין אדם לחברו</span>
+                            <span class="topic-participants">👥 דיון קבוצתי</span>
+                        </div>
+                        <a href="#" class="topic-button disabled">
+                            <span class="material-icons">schedule</span>
+                            בקרוב
+                        </a>
+                    </div>
+                </article> -->
+            </div>
+        </section>
+    </main>
+
+    <footer class="modern-footer">
+        <p class="footer-credit" onclick="showContactInfo()">נבנה ע"י Y.D. Systems</p>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+
+</html>

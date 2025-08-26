@@ -281,12 +281,12 @@ style.textContent = `
         gap: 0.5rem;
         margin-top: 0.5rem;
         padding: 0.5rem;
-        background-color: #f8f9fa;
+        background-color: #2572c0;
         border-radius: 4px;
     }
     
     .formatting-toolbar button {
-        background: white;
+        background: #2572c0;
         border: 1px solid #dee2e6;
         padding: 0.25rem 0.5rem;
         border-radius: 3px;
@@ -295,7 +295,7 @@ style.textContent = `
     }
     
     .formatting-toolbar button:hover {
-        background-color: #e9ecef;
+        background-color: #2572c0;
     }
     
     .replies-container {
@@ -506,10 +506,25 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Starting to load comments...');
     loadComments();
     
-    // טעינת שם וטלפון אם קיימים
-    const userDetails = loadUserDetailsFromLocalStorage();
-    if (userDetails.name) document.getElementById('commenterName').value = userDetails.name;
-    if (userDetails.phone) document.getElementById('commenterPhone').value = userDetails.phone;
+    // טעינת שם וטלפון אם קיימים - וודא שהשדות קיימים קודם
+    setTimeout(() => {
+        const userDetails = loadUserDetailsFromLocalStorage();
+        const commenterNameField = document.getElementById('commenterName');
+        const commenterPhoneField = document.getElementById('commenterPhone');
+        
+        console.log('User details loaded:', userDetails);
+        console.log('Name field found:', commenterNameField);
+        console.log('Phone field found:', commenterPhoneField);
+        
+        if (commenterNameField && userDetails.name) {
+            commenterNameField.value = userDetails.name;
+            console.log('Set name field value:', userDetails.name);
+        }
+        if (commenterPhoneField && userDetails.phone) {
+            commenterPhoneField.value = userDetails.phone;
+            console.log('Set phone field value:', userDetails.phone);
+        }
+    }, 100);
     
     // Handle form submission
     commentForm.addEventListener('submit', async function(e) {
@@ -541,7 +556,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const newComment = {
             name: commenterName,
             phone: commenterPhone,
-            text: commentText
+            text: commentText,
+            discussionId: window.DISCUSSION_ID
         };
         
         // Save user details to localStorage
@@ -589,8 +605,8 @@ document.addEventListener('DOMContentLoaded', function() {
         showCommentsLoading();
         
         try {
-            console.log('Loading comments...');
-            const result = await fetchFromAPI('getDiscussionComments');
+            console.log('Loading comments for discussion:', window.DISCUSSION_ID);
+            const result = await fetchFromAPI('getDiscussionComments', 'GET', { discussionId: window.DISCUSSION_ID });
             console.log('Comments result:', result);
             
             // Clear existing comments
@@ -599,12 +615,25 @@ document.addEventListener('DOMContentLoaded', function() {
             if (result.data && result.data.length > 0) {
                 console.log('Found', result.data.length, 'comments');
                 
+                // Get sort order
+                const sortOrder = getSortOrder();
+                let comments = result.data.slice();
+                
+                // Sort comments based on selected order
+                if (sortOrder === 'newest') {
+                    comments.sort((a, b) => b.timestamp - a.timestamp);
+                } else if (sortOrder === 'oldest') {
+                    comments.sort((a, b) => a.timestamp - b.timestamp);
+                } else if (sortOrder === 'mostLiked') {
+                    comments.sort((a, b) => (b.likes || 0) - (a.likes || 0));
+                }
+                
                 // Organize comments into hierarchy
                 const topLevelComments = [];
                 const repliesMap = new Map();
                 
                 // Separate top-level comments from replies
-                result.data.forEach(comment => {
+                comments.forEach(comment => {
                     console.log('Processing comment:', comment.name, 'ID:', comment.id, 'ReplyTo:', comment.replyTo);
                     if (comment.replyTo && comment.replyTo.toString().trim() !== '') {
                         // This is a reply
@@ -625,9 +654,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log('Replies map:', Array.from(repliesMap.entries()).map(([parentId, replies]) => 
                     `${parentId}: ${replies.map(r => r.name).join(', ')}`
                 ));
-                
-                // Sort top-level comments by timestamp (oldest first for proper threading)
-                topLevelComments.sort((a, b) => a.timestamp - b.timestamp);
                 
                 // Display top-level comments with their replies
                 topLevelComments.forEach(comment => {
@@ -802,7 +828,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         .formatting-toolbar button {
-            background: white;
+            background: #2572c0;
             border: 1px solid #dee2e6;
             padding: 0.25rem 0.5rem;
             border-radius: 3px;
@@ -811,7 +837,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         .formatting-toolbar button:hover {
-            background-color: #e9ecef;
+            background-color: #2572c0;
         }
         
         .replies-container {
@@ -1113,18 +1139,26 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // הצגת שדות שם וטלפון רק כאשר המשתמש מתחיל להקליד בתיבת התגובה (commentText), ומסתיר אותם כאשר השדה ריק.
-    const commentTextEditor = document.getElementById('commentText');
-    const userDetailsFields = document.getElementById('userDetailsFields');
-    if (commentTextEditor && userDetailsFields) {
-        commentTextEditor.addEventListener('input', function() {
-            if (this.textContent.trim().length > 0) {
-                userDetailsFields.style.display = 'block';
-            } else {
-                userDetailsFields.style.display = 'none';
-            }
-        });
-    }
+    // הצגת שדות שם וטלפון - כעת הם גלויים כברירת מחדל
+    setTimeout(() => {
+        const commentTextEditor = document.getElementById('commentText');
+        const userDetailsFields = document.getElementById('userDetailsFields');
+        if (commentTextEditor && userDetailsFields) {
+            // וודא שהשדות גלויים
+            userDetailsFields.style.display = 'block';
+            userDetailsFields.classList.remove('hidden');
+            console.log('User details fields should be visible now');
+            
+            // אפשרות להסתיר שדות אם התיבת טקסט ריקה (אופציונלי)
+            commentTextEditor.addEventListener('input', function() {
+                // השדות נשארים גלויים תמיד
+            });
+        } else {
+            console.log('Could not find commentTextEditor or userDetailsFields');
+            console.log('commentTextEditor:', commentTextEditor);
+            console.log('userDetailsFields:', userDetailsFields);
+        }
+    }, 100);
     
     // Add formatting toolbar to reply form
     const replyEditor = document.getElementById('replyText');
@@ -1193,7 +1227,8 @@ document.addEventListener('DOMContentLoaded', function() {
             name: replyName,
             phone: replyPhone,
             text: replyText,
-            replyTo: window.currentReplyTo
+            replyTo: window.currentReplyTo,
+            discussionId: window.DISCUSSION_ID
         };
         
         // Generate token for reply
@@ -1414,10 +1449,10 @@ function addFormattingToolbar(commentText) {
         flex-wrap: wrap;
     `;
     toolbar.innerHTML = `
-        <button onclick="formatText('bold')" title="מודגש" style="font-weight: bold; padding: 8px 12px; border: 1px solid #ccc; background: white; border-radius: 4px; cursor: pointer; font-size: 14px; min-width: 40px;">ב</button>
-        <button onclick="formatText('italic')" title="נטוי" style="font-style: italic; padding: 8px 12px; border: 1px solid #ccc; background: white; border-radius: 4px; cursor: pointer; font-size: 14px; min-width: 40px;">נ</button>
-        <button onclick="formatText('underline')" title="קו תחתון" style="text-decoration: underline; padding: 8px 12px; border: 1px solid #ccc; background: white; border-radius: 4px; cursor: pointer; font-size: 14px; min-width: 40px;">ק</button>
-        <button onclick="formatText('strikethrough')" title="קו חוצה" style="text-decoration: line-through; padding: 8px 12px; border: 1px solid #ccc; background: white; border-radius: 4px; cursor: pointer; font-size: 14px; min-width: 40px;">ח</button>
+        <button onclick="formatText('bold')" title="מודגש" style="font-weight: bold; padding: 8px 12px; border: 1px solid #ccc; background: white; border-radius: 4px; cursor: pointer; font-size: 14px; min-width: 40px; color: #2c3e50;">ב</button>
+        <button onclick="formatText('italic')" title="נטוי" style="font-style: italic; padding: 8px 12px; border: 1px solid #ccc; background: white; border-radius: 4px; cursor: pointer; font-size: 14px; min-width: 40px; color: #2c3e50;">נ</button>
+        <button onclick="formatText('underline')" title="קו תחתון" style="text-decoration: underline; padding: 8px 12px; border: 1px solid #ccc; background: white; border-radius: 4px; cursor: pointer; font-size: 14px; min-width: 40px; color: #2c3e50;">ק</button>
+        <button onclick="formatText('strikethrough')" title="קו חוצה" style="text-decoration: line-through; padding: 8px 12px; border: 1px solid #ccc; background: white; border-radius: 4px; cursor: pointer; font-size: 14px; min-width: 40px; color: #2c3e50;">ח</button>
     `;
     
     commentText.parentNode.insertBefore(toolbar, commentText.nextSibling);
@@ -1540,7 +1575,7 @@ if (sortSelect) {
 async function loadComments() {
     showCommentsLoading();
     try {
-        const result = await fetchFromAPI('getDiscussionComments');
+        const result = await fetchFromAPI('getDiscussionComments', 'GET', { discussionId: window.DISCUSSION_ID });
         commentsContainer.innerHTML = '';
         if (result.data && result.data.length > 0) {
             // סידור ראשי

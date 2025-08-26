@@ -1,7 +1,36 @@
 // פונקציות משותפות כמו showModal, initDarkMode וכו' 
 
 // שימוש בקונפיגורציה המרכזית
-const API_URL = CONFIG.api.url;
+// const API_URL = CONFIG.api.url; // הסרתי את זה כי זה כבר מוגדר ב-config.js
+
+// טיפול במצב לילה
+function initDarkMode() {
+    const themeToggle = document.querySelector('.theme-toggle');
+    if (!themeToggle) return;
+    
+    const currentTheme = localStorage.getItem('theme');
+
+    if (currentTheme === 'dark') {
+        document.body.setAttribute('data-theme', 'dark');
+        const icon = themeToggle.querySelector('.material-icons');
+        if (icon) icon.textContent = 'light_mode';
+    }
+
+    themeToggle.addEventListener('click', () => {
+        const isDark = document.body.hasAttribute('data-theme');
+        const icon = themeToggle.querySelector('.material-icons');
+
+        if (!isDark) {
+            document.body.setAttribute('data-theme', 'dark');
+            localStorage.setItem('theme', 'dark');
+            if (icon) icon.textContent = 'light_mode';
+        } else {
+            document.body.removeAttribute('data-theme');
+            localStorage.setItem('theme', 'light');
+            if (icon) icon.textContent = 'dark_mode';
+        }
+    });
+}
 
 // קאש לנתונים
 const cache = {
@@ -11,8 +40,8 @@ const cache = {
 
 // הגדרת זמינות החידון
 const QUIZ_CONFIG = {
-    // isAvailable: false, // האם החידון זמין כרגע
-    isAvailable: true, // האם החידון זמין כרגע
+    isAvailable: false, // האם החידון זמין כרגע
+    // isAvailable: true, // האם החידון זמין כרגע
     nextQuizDate: '2024-05-26'  // תאריך החידון הבא
 };
 
@@ -38,7 +67,7 @@ function hideElementLoading(element) {
 }
 
 async function fetchFromAPI(action, method = 'GET', data = null) {
-    const url = new URL(API_URL);
+    const url = new URL(CONFIG.api.url); // Use CONFIG.api.url directly
     url.searchParams.append('action', action);
     
     // תמיד נשתמש ב-GET ונעביר נתונים כפרמטרים בURL
@@ -246,38 +275,6 @@ function showModal(options) {
         }
     });
 }
-
-// טיפול במצב לילה
-function initDarkMode() {
-    return; // מונע את הפעלת מצב לילה
-    const themeToggle = document.querySelector('.theme-toggle');
-    const currentTheme = localStorage.getItem('theme');
-    
-    if (currentTheme === 'dark') {
-        document.body.setAttribute('data-theme', 'dark');
-        themeToggle.querySelector('.material-icons').textContent = 'light_mode';
-    }
-    
-    themeToggle.addEventListener('click', () => {
-        const isDark = document.body.hasAttribute('data-theme');
-        const icon = themeToggle.querySelector('.material-icons');
-        
-        if (!isDark) {
-            document.body.setAttribute('data-theme', 'dark');
-            localStorage.setItem('theme', 'dark');
-            icon.textContent = 'light_mode';
-        } else {
-            document.body.removeAttribute('data-theme');
-            localStorage.setItem('theme', 'light');
-            icon.textContent = 'dark_mode';
-        }
-    });
-}
-
-// מעקב אחר גלילת העמוד
-window.addEventListener('scroll', () => {
-    document.body.classList.toggle('scrolled', window.scrollY > 50);
-});
 
 // פונקציה לניתוב לדף המתאים
 function handleQuizNavigation(event) {
