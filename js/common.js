@@ -3,18 +3,18 @@
 // שימוש בקונפיגורציה המרכזית
 // const API_URL = CONFIG.api.url; // הסרתי את זה כי זה כבר מוגדר ב-config.js
 
-// טיפול במצב לילה
+// טיפול במצב לילה - תמיד נשאר במצב בהיר
 function initDarkMode() {
     const themeToggle = document.querySelector('.theme-toggle');
     if (!themeToggle) return;
     
-    const currentTheme = localStorage.getItem('theme');
-
-    if (currentTheme === 'dark') {
-        document.body.setAttribute('data-theme', 'dark');
-        const icon = themeToggle.querySelector('.material-icons');
-        if (icon) icon.textContent = 'light_mode';
-    }
+    // תמיד נשאר במצב בהיר
+    document.body.removeAttribute('data-theme');
+    localStorage.setItem('theme', 'light');
+    
+    // עדכון האייקון
+    const icon = themeToggle.querySelector('.material-icons');
+    if (icon) icon.textContent = 'dark_mode';
 
     themeToggle.addEventListener('click', () => {
         const isDark = document.body.hasAttribute('data-theme');
