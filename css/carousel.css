@@ -125,7 +125,7 @@
 }
 
 /* קוד חדש - הוספת סגנונות עבור סרטונים בקרוסלה */
-.ad-card.video-card {
+.announcement-card.video-card {
     position: relative;
     overflow: hidden;
     display: flex;
@@ -144,7 +144,7 @@
     overflow: hidden;
 }
 
-.ad-video {
+.announcement-video {
     position: absolute;
     top: 0;
     left: 0;
@@ -153,7 +153,7 @@
     border: none;
 }
 
-.video-card .ad-overlay {
+.video-card .announcement-overlay {
     background-color: rgba(0, 0, 0, 0.6);
     position: absolute;
     top: 0;
@@ -168,7 +168,7 @@
     cursor: pointer;
 }
 
-.video-card .ad-overlay .material-icons {
+.video-card .announcement-overlay .material-icons {
     font-size: 3rem;
     margin-bottom: 0.5rem;
 } 

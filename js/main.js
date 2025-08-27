@@ -1,11 +1,11 @@
 // שימוש בקונפיגורציה המרכזית
 // const API_URL = CONFIG.api.url; // הסרתי את זה כי זה כבר מוגדר ב-config.js
 
-// קאש לנתונים
-const cache = {
-    questions: null,
-    branches: null
-};
+// קאש לנתונים - הועבר ל-common.js
+// const cache = {
+//     questions: null,
+//     branches: null
+// };
 
 function showLoading() {
     document.getElementById('loading').classList.remove('hidden');

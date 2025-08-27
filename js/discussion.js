@@ -186,7 +186,7 @@ function addCommentToDisplay(comment, parentName = null, repliesMap = null) {
     }, 10);
     
     console.log('Comment added successfully');
-    updateLikeButtons(); // Add this line to update like buttons after loadComments
+    updateLikeButtons(); // Update like buttons after adding comment
 }
 
 // Function to show no comments message
@@ -208,290 +208,7 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-// Add CSS animations for notifications
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideIn {
-        from {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
-    }
-    
-    @keyframes slideOut {
-        from {
-            transform: translateX(0);
-            opacity: 1;
-        }
-        to {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-    }
-    
-    .no-comments {
-        text-align: center;
-        padding: 2rem;
-        color: #6c757d;
-        font-style: italic;
-    }
-    
-    [data-theme="dark"] .no-comments {
-        color: #a0aec0;
-    }
-    
-    .comment-actions {
-        display: flex;
-        gap: 1rem;
-        margin-top: 1rem;
-        flex-wrap: wrap;
-    }
-    
-    .action-btn {
-        background: none;
-        border: none;
-        color: #6c757d;
-        cursor: pointer;
-        padding: 0.5rem;
-        border-radius: 4px;
-        display: flex;
-        align-items: center;
-        gap: 0.25rem;
-        font-size: 0.9rem;
-        transition: all 0.2s ease;
-    }
-    
-    .action-btn:hover {
-        background-color: #f8f9fa;
-        color: #007bff;
-    }
-    
-    .action-btn.liked {
-        color: #28a745;
-    }
-    
 
-    
-    .formatting-toolbar {
-        display: flex;
-        gap: 0.5rem;
-        margin-top: 0.5rem;
-        padding: 0.5rem;
-        background-color: #2572c0;
-        border-radius: 4px;
-    }
-    
-    .formatting-toolbar button {
-        background: #2572c0;
-        border: 1px solid #dee2e6;
-        padding: 0.25rem 0.5rem;
-        border-radius: 3px;
-        cursor: pointer;
-        font-size: 0.8rem;
-    }
-    
-    .formatting-toolbar button:hover {
-        background-color: #2572c0;
-    }
-    
-    .replies-container {
-        margin-top: 1rem;
-        padding-left: 2rem;
-        border-left: 2px solid #e9ecef;
-    }
-    
-    [data-theme="dark"] .action-btn:hover {
-        background-color: #2d3748;
-    }
-    
-    [data-theme="dark"] .formatting-toolbar {
-        background-color: #2d3748;
-    }
-    
-    [data-theme="dark"] .formatting-toolbar button {
-        background-color: #4a5568;
-        border-color: #718096;
-        color: white;
-    }
-    
-    [data-theme="dark"] .formatting-toolbar button:hover {
-        background-color: #718096;
-    }
-    
-    /* Mobile optimizations */
-    @media (max-width: 768px) {
-        .comment-item {
-            margin: 0.5rem 0;
-            padding: 0.75rem;
-            border-radius: 8px;
-        }
-        
-        .comment-header {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 0.25rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .commenter-name {
-            font-size: 1rem;
-            font-weight: 600;
-        }
-        
-        .comment-date {
-            font-size: 0.8rem;
-            color: #6c757d;
-        }
-        
-        .comment-text {
-            font-size: 0.95rem;
-            line-height: 1.4;
-            margin-bottom: 0.5rem;
-        }
-        
-        .comment-actions {
-            gap: 0.5rem;
-            margin-top: 0.75rem;
-            flex-wrap: wrap;
-        }
-        
-        .action-btn {
-            padding: 0.4rem 0.6rem;
-            font-size: 0.85rem;
-            min-width: auto;
-        }
-        
-        .action-btn .material-icons {
-            font-size: 0.9rem !important;
-            margin-left: 0.2rem !important;
-        }
-        
-        .reply-indicator {
-            font-size: 0.8rem !important;
-            margin-bottom: 0.4rem !important;
-        }
-        
-        /* Reduce indentation for replies on mobile */
-        .comment-item[style*="margin-left"] {
-            margin-left: 1rem !important;
-        }
-        
-        .replies-container {
-            padding-left: 1rem;
-            margin-top: 0.5rem;
-        }
-        
-        /* Optimize comment form for mobile */
-        .comment-form {
-            padding: 1rem;
-            margin: 1rem 0;
-        }
-        
-        .comment-form input,
-        .comment-form textarea {
-            padding: 0.75rem;
-            font-size: 1rem;
-        }
-        
-        .comment-form button {
-            padding: 0.75rem 1.5rem;
-            font-size: 1rem;
-        }
-        
-        /* Optimize reply form for mobile */
-        #replyForm {
-            padding: 1rem;
-            margin: 1rem 0;
-        }
-        
-        #replyForm input,
-        #replyForm textarea {
-            padding: 0.75rem;
-            font-size: 1rem;
-        }
-        
-        #replyForm button {
-            padding: 0.75rem 1.5rem;
-            font-size: 1rem;
-        }
-        
-        /* Reduce margins and padding for better space usage */
-        .comments-container {
-            padding: 0.5rem;
-        }
-        
-        .comment-form,
-        #replyForm {
-            margin: 0.5rem 0;
-        }
-        
-        /* Make buttons more touch-friendly */
-        .action-btn {
-            min-height: 44px;
-            min-width: 44px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        /* Optimize formatting toolbar for mobile */
-        .formatting-toolbar {
-            gap: 0.25rem;
-            padding: 0.4rem;
-            flex-wrap: wrap;
-        }
-        
-        .formatting-toolbar button {
-            padding: 0.4rem 0.6rem;
-            font-size: 0.75rem;
-            min-width: 36px;
-            min-height: 36px;
-        }
-    }
-    
-    /* Extra small screens */
-    @media (max-width: 480px) {
-        .comment-item {
-            padding: 0.5rem;
-            margin: 0.25rem 0;
-        }
-        
-        .comment-actions {
-            gap: 0.25rem;
-        }
-        
-        .action-btn {
-            padding: 0.3rem 0.5rem;
-            font-size: 0.8rem;
-        }
-        
-        .comment-text {
-            font-size: 0.9rem;
-        }
-        
-        .commenter-name {
-            font-size: 0.95rem;
-        }
-        
-        .comment-date {
-            font-size: 0.75rem;
-        }
-        
-        /* Reduce indentation even more for very small screens */
-        .comment-item[style*="margin-left"] {
-            margin-left: 0.5rem !important;
-        }
-        
-        .replies-container {
-            padding-left: 0.5rem;
-        }
-    }
-`;
-document.head.appendChild(style);
 
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Discussion page loaded');
@@ -671,6 +388,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         }
                     }
                 });
+                updateLikeButtons(); // Update like buttons after loading all comments
             } else {
                 console.log('No comments found, showing no comments message');
                 showNoCommentsMessage();
@@ -748,6 +466,7 @@ document.addEventListener('DOMContentLoaded', function() {
         replyElement.style.marginBottom = '0.5rem';
         
         container.appendChild(replyElement);
+        updateLikeButtons(); // Update like buttons after adding reply
     }
     
     // Add CSS animations for notifications
@@ -1277,6 +996,8 @@ function showReplyForm(commentId, commenterName) {
     const replyForm = document.getElementById('replyForm');
     const replyTitle = document.querySelector('.reply-title');
     
+    if (!replyForm || !replyTitle) return;
+    
     // Update title to show who we're replying to
     replyTitle.textContent = `השבת על תגובה של ${commenterName}:`;
     
@@ -1300,7 +1021,9 @@ function cancelReply() {
 
 function hideReplyForm() {
     const replyForm = document.getElementById('replyForm');
-    replyForm.classList.add('hidden');
+    if (replyForm) {
+        replyForm.classList.add('hidden');
+    }
     window.currentReplyTo = null;
 }
 
@@ -1308,7 +1031,11 @@ function hideReplyForm() {
 function toggleReplies(commentId) {
     const repliesContainer = document.getElementById(`replies-${commentId}`);
     const toggleBtn = event.target.closest('.toggle-replies-btn');
+    
+    if (!repliesContainer || !toggleBtn) return;
+    
     const icon = toggleBtn.querySelector('.material-icons');
+    if (!icon) return;
     
     if (repliesContainer.style.display === 'none') {
         repliesContainer.style.display = 'block';
@@ -1347,8 +1074,12 @@ function removeLiked(commentId) {
 // עדכון toggleLike
 async function toggleLike(commentId) {
     const likeBtn = event.target.closest('.like-btn');
+    if (!likeBtn) return;
+    
     const likeCount = likeBtn.querySelector('.like-count');
-    const currentCount = parseInt(likeCount.textContent);
+    if (!likeCount) return;
+    
+    const currentCount = parseInt(likeCount.textContent) || 0;
     
     // מניעת לייק כפול
     if (!likeBtn.classList.contains('liked') && hasLiked(commentId)) {
@@ -1401,16 +1132,22 @@ async function toggleLike(commentId) {
     } finally {
         likeBtn.disabled = false;
     }
-    updateLikeButtons(); // Add this line to update like buttons after toggleLike
+    updateLikeButtons(); // Update like buttons after toggling like
 }
 
 
 
 function toggleEdit(commentId) {
     const commentElement = document.querySelector(`[data-comment-id="${commentId}"]`);
+    if (!commentElement) return;
+    
     const commentText = commentElement.querySelector('.comment-text');
     const editBtn = commentElement.querySelector('.edit-btn');
+    
+    if (!commentText || !editBtn) return;
+    
     const icon = editBtn.querySelector('.material-icons');
+    if (!icon) return;
     
     if (commentText.contentEditable === 'false') {
         // Enable editing
@@ -1436,6 +1173,8 @@ function toggleEdit(commentId) {
 }
 
 function addFormattingToolbar(commentText) {
+    if (!commentText) return;
+    
     const toolbar = document.createElement('div');
     toolbar.className = 'formatting-toolbar';
     toolbar.style.cssText = `
@@ -1459,21 +1198,31 @@ function addFormattingToolbar(commentText) {
 }
 
 function removeFormattingToolbar() {
-    const toolbar = document.querySelector('.formatting-toolbar');
-    if (toolbar) {
-        toolbar.remove();
-    }
+    const toolbars = document.querySelectorAll('.formatting-toolbar');
+    toolbars.forEach(toolbar => {
+        if (toolbar) {
+            toolbar.remove();
+        }
+    });
 }
 
 function formatText(command) {
-    document.execCommand(command, false, null);
+    try {
+        document.execCommand(command, false, null);
+    } catch (error) {
+        console.error('Error formatting text:', error);
+    }
 }
 
 function formatNewText(command) {
     const editor = document.getElementById('commentText');
     if (editor) {
         editor.focus();
-        document.execCommand(command, false, null);
+        try {
+            document.execCommand(command, false, null);
+        } catch (error) {
+            console.error('Error formatting new text:', error);
+        }
         updateCharCounter();
     }
 }
@@ -1482,7 +1231,11 @@ function formatReplyText(command) {
     const editor = document.getElementById('replyText');
     if (editor) {
         editor.focus();
-        document.execCommand(command, false, null);
+        try {
+            document.execCommand(command, false, null);
+        } catch (error) {
+            console.error('Error formatting reply text:', error);
+        }
     }
 }
 
@@ -1490,32 +1243,42 @@ function saveCommentEdit(commentId, newText) {
     // Implement saving to server
     console.log('Saving edit for comment:', commentId, 'New text:', newText);
     showNotification('התגובה נשמרה בהצלחה', 'success');
+    updateLikeButtons(); // Update like buttons after editing comment
 }
 
 // User identification functions
 function generateCommentToken(name, phone) {
-    // Create a unique token based on name, phone, and timestamp
-    const timestamp = Date.now();
-    const data = `${name}-${phone}-${timestamp}`;
-    // Use encodeURIComponent to handle Hebrew characters
-    return btoa(encodeURIComponent(data)); // Base64 encode
+    try {
+        // Create a unique token based on name, phone, and timestamp
+        const timestamp = Date.now();
+        const data = `${name}-${phone}-${timestamp}`;
+        // Use encodeURIComponent to handle Hebrew characters
+        return btoa(encodeURIComponent(data)); // Base64 encode
+    } catch (error) {
+        console.error('Error generating comment token:', error);
+        return null;
+    }
 }
 
 function saveCommentToken(commentId, token) {
-    const tokens = JSON.parse(localStorage.getItem('commentTokens') || '{}');
-    tokens[commentId] = token;
-    localStorage.setItem('commentTokens', JSON.stringify(tokens));
+    try {
+        const tokens = JSON.parse(localStorage.getItem('commentTokens') || '{}');
+        tokens[commentId] = token;
+        localStorage.setItem('commentTokens', JSON.stringify(tokens));
+    } catch (error) {
+        console.error('Error saving comment token:', error);
+    }
 }
 
 function isCommentAuthor(commentId, commenterName) {
-    const tokens = JSON.parse(localStorage.getItem('commentTokens') || '{}');
-    const savedToken = tokens[commentId];
-    
-    if (!savedToken) {
-        return false;
-    }
-    
     try {
+        const tokens = JSON.parse(localStorage.getItem('commentTokens') || '{}');
+        const savedToken = tokens[commentId];
+        
+        if (!savedToken) {
+            return false;
+        }
+        
         const decodedToken = atob(savedToken);
         const decodedData = decodeURIComponent(decodedToken);
         const [name, phone, timestamp] = decodedData.split('-');
@@ -1523,13 +1286,15 @@ function isCommentAuthor(commentId, commenterName) {
         // Check if the name matches (phone is optional for privacy)
         return name === commenterName;
     } catch (error) {
-        console.error('Error decoding token:', error);
+        console.error('Error checking comment author:', error);
         return false;
     }
 }
 
 // Function to show/hide loading state
 function showLoadingState(button, isLoading) {
+    if (!button) return;
+    
     const spinner = button.querySelector('.loading-spinner');
     if (isLoading) {
         button.classList.add('loading');
@@ -1544,14 +1309,23 @@ function showLoadingState(button, isLoading) {
 
 // שמירת שם וטלפון ב-localStorage אחרי שליחת תגובה
 function saveUserDetailsToLocalStorage(name, phone) {
-    localStorage.setItem('discussionUserName', name);
-    localStorage.setItem('discussionUserPhone', phone);
+    try {
+        localStorage.setItem('discussionUserName', name);
+        localStorage.setItem('discussionUserPhone', phone);
+    } catch (error) {
+        console.error('Error saving user details to localStorage:', error);
+    }
 }
 function loadUserDetailsFromLocalStorage() {
-    return {
-        name: localStorage.getItem('discussionUserName') || '',
-        phone: localStorage.getItem('discussionUserPhone') || ''
-    };
+    try {
+        return {
+            name: localStorage.getItem('discussionUserName') || '',
+            phone: localStorage.getItem('discussionUserPhone') || ''
+        };
+    } catch (error) {
+        console.error('Error loading user details from localStorage:', error);
+        return { name: '', phone: '' };
+    }
 }
 
 // סידור תגובות - שליטה וסידור
@@ -1604,7 +1378,7 @@ async function loadComments() {
             topLevelComments.forEach(comment => {
                 addCommentToDisplay(comment, null, repliesMap);
             });
-            updateLikeButtons(); // Add this line to update like buttons after loadComments
+            updateLikeButtons(); // Update like buttons after loading all comments
         } else {
             showNoCommentsMessage();
         }
@@ -1620,11 +1394,14 @@ async function loadComments() {
 function updateLikeButtons() {
     const likedComments = getLikedComments();
     document.querySelectorAll('.like-btn').forEach(btn => {
-        const commentId = btn.closest('.comment-item, .reply-item').getAttribute('data-comment-id');
-        if (likedComments.includes(commentId)) {
-            btn.classList.add('liked');
-        } else {
-            btn.classList.remove('liked');
+        const commentElement = btn.closest('.comment-item, .reply-item');
+        if (commentElement) {
+            const commentId = commentElement.getAttribute('data-comment-id');
+            if (commentId && likedComments.includes(commentId)) {
+                btn.classList.add('liked');
+            } else {
+                btn.classList.remove('liked');
+            }
         }
     });
 }

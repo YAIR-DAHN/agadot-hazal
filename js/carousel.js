@@ -118,18 +118,18 @@ document.addEventListener('DOMContentLoaded', () => {
 document.addEventListener('DOMContentLoaded', function() {
     // טיפול בלחיצה על תמונות רגילות בקרוסלה
     document.addEventListener('click', function(e) {
-        const adCard = e.target.closest('.ad-card');
-        const adImage = e.target.closest('.ad-image');
+        const announcementCard = e.target.closest('.announcement-card');
+        const announcementImage = e.target.closest('.announcement-image');
         
-        if (adCard && adImage) {
-            const videoSrc = adImage.getAttribute('data-video-src');
+        if (announcementCard && announcementImage) {
+            const videoSrc = announcementImage.getAttribute('data-video-src');
             
             if (videoSrc) {
                 // טיפול בסרטון
-                handleVideoClick(adImage, videoSrc);
+                handleVideoClick(announcementImage, videoSrc);
             } else {
                 // טיפול בתמונה רגילה - הגדלה
-                handleImageClick(adImage);
+                handleImageClick(announcementImage);
             }
         }
     });

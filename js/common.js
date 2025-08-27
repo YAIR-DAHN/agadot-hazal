@@ -358,10 +358,10 @@ function closeImageModal() {
 
 // הוספת מאזיני לחיצה לכרטיסי המודעות
 document.addEventListener('DOMContentLoaded', () => {
-    const adCards = document.querySelectorAll('.ad-card');
-    adCards.forEach(card => {
+    const announcementCards = document.querySelectorAll('.announcement-card');
+    announcementCards.forEach(card => {
         card.addEventListener('click', () => {
-            const image = card.querySelector('.ad-image');
+            const image = card.querySelector('.announcement-image');
             if (image) {
                 openImageModal(image.src);
             }

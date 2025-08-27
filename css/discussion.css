@@ -132,12 +132,12 @@ body {
 }
 
 .discussion-question {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    background: linear-gradient(135deg, #4CAF50 0%, #45A049 100%);
     color: white;
     padding: 1.5rem;
     border-radius: 15px;
     margin-bottom: 2rem;
-    box-shadow: 0 10px 30px rgba(240, 147, 251, 0.3);
+    box-shadow: 0 10px 30px rgba(76, 175, 80, 0.3);
 }
 
 .discussion-question h3 {
@@ -336,18 +336,18 @@ body {
 
 /* Comment Items */
 .comment-item {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    background: linear-gradient(135deg, #FF8C42 0%, #FF6B35 100%);
     color: white;
     padding: 1.5rem;
     border-radius: 15px;
     margin-bottom: 1rem;
-    box-shadow: 0 8px 25px rgba(240, 147, 251, 0.3);
+    box-shadow: 0 8px 25px rgba(255, 140, 66, 0.3);
     transition: transform 0.3s ease;
 }
 
 .comment-item:hover {
     transform: translateY(-3px);
-    box-shadow: 0 12px 35px rgba(240, 147, 251, 0.4);
+    box-shadow: 0 12px 35px rgba(255, 140, 66, 0.4);
 }
 
 .comment-header {
@@ -377,33 +377,31 @@ body {
 .comment-actions {
     display: flex;
     gap: 1rem;
+    margin-top: 1rem;
     flex-wrap: wrap;
 }
 
 .action-btn {
-    background: rgba(255,255,255,0.2);
-    color: white;
+    background: none;
     border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
+    color: #6c757d;
     cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 4px;
     display: flex;
     align-items: center;
-    gap: 0.3rem;
+    gap: 0.25rem;
     font-size: 0.9rem;
-    transition: all 0.3s ease;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255,255,255,0.3);
+    transition: all 0.2s ease;
 }
 
 .action-btn:hover {
-    background: rgba(255,255,255,0.3);
-    transform: translateY(-2px);
+    background-color: #f8f9fa;
+    color: #007bff;
 }
 
 .action-btn.liked {
-    background: rgba(40, 167, 69, 0.3);
-    border-color: rgba(40, 167, 69, 0.5);
+    color: #28a745;
 }
 
 /* Reply Form */
@@ -781,11 +779,14 @@ body {
     
     .comment-actions {
         gap: 0.5rem;
+        margin-top: 0.75rem;
+        flex-wrap: wrap;
     }
     
     .action-btn {
-        padding: 0.4rem 0.8rem;
-        font-size: 0.8rem;
+        padding: 0.4rem 0.6rem;
+        font-size: 0.85rem;
+        min-width: auto;
     }
     
     .reply-actions {

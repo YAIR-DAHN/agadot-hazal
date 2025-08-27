@@ -120,13 +120,13 @@ body {
 
 /* Hero Section */
 .hero-section {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    background: linear-gradient(135deg, #20B2AA 0%, #008B8B 100%);
     border-radius: 25px;
     padding: 3rem 2rem;
     text-align: center;
     color: white;
     margin-bottom: 3rem;
-    box-shadow: 0 20px 40px rgba(240, 147, 251, 0.3);
+    box-shadow: 0 20px 40px rgba(32, 178, 170, 0.3);
     position: relative;
     overflow: hidden;
 }
@@ -452,7 +452,7 @@ body {
 }
 
 .quiz-introduction {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    background: linear-gradient(135deg, #FF8C42 0%, #FF6B35 100%);
     color: white;
     padding: 1.5rem;
     border-radius: 15px;
@@ -738,8 +738,8 @@ body {
     font-size: 2.5rem;
 }
 
-/* Ads Section */
-.ads-section {
+/* Announcements Section */
+.announcements-section {
     margin-bottom: 3rem;
 }
 
@@ -750,7 +750,7 @@ body {
     box-shadow: 0 10px 30px rgba(0,0,0,0.1);
 }
 
-.ad-card {
+.announcement-card {
     position: relative;
     border-radius: 15px;
     overflow: hidden;
@@ -758,17 +758,17 @@ body {
     transition: transform 0.3s ease;
 }
 
-.ad-card:hover {
+.announcement-card:hover {
     transform: scale(1.02);
 }
 
-.ad-image {
+.announcement-image {
     width: 100%;
     height: auto;
     display: block;
 }
 
-.ad-overlay {
+.announcement-overlay {
     position: absolute;
     top: 0;
     left: 0;
@@ -785,7 +785,7 @@ body {
     cursor: pointer;
 }
 
-.ad-card:hover .ad-overlay {
+.announcement-card:hover .announcement-overlay {
     opacity: 1;
 }
 
@@ -821,12 +821,12 @@ body {
 }
 
 .update-card {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    background: linear-gradient(135deg, #4CAF50 0%, #45A049 100%);
     color: white;
         padding: 1.5rem;
     border-radius: 15px;
         margin-bottom: 1rem;
-    box-shadow: 0 5px 15px rgba(240, 147, 251, 0.3);
+    box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
     transition: transform 0.3s ease;
 }
 
@@ -1377,7 +1377,7 @@ body {
         font-size: 1.5rem;
     }
     
-    .ad-card {
+    .announcement-card {
         height: 200px;
     }
     
@@ -1454,7 +1454,7 @@ body {
         font-size: 1.3rem;
 }
 
-.ad-card {
+.announcement-card {
         height: 150px;
     }
     
@@ -1826,7 +1826,7 @@ body {
 .topic-image {
     height: 200px;
     overflow: hidden;
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    background: linear-gradient(135deg, #20B2AA 0%, #008B8B 100%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1888,7 +1888,7 @@ body {
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    background: linear-gradient(135deg, #FF8C42 0%, #FF6B35 100%);
     color: white;
     text-decoration: none;
     padding: 0.8rem 1.5rem;
@@ -1900,7 +1900,7 @@ body {
 
 .topic-button:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(240, 147, 251, 0.3);
+    box-shadow: 0 10px 20px rgba(255, 140, 66, 0.3);
 }
 
 .topic-button.disabled {
