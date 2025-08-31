@@ -77,11 +77,11 @@ function showNotification(message, type = 'info') {
 // פונקציה גלובלית להצגת תגובה
 function addCommentToDisplay(comment, parentName = null, repliesMap = null) {
     console.log('Adding comment to display:', comment, 'Parent:', parentName);
-    
+
     const commentElement = document.createElement('div');
     commentElement.className = 'comment-item';
     commentElement.setAttribute('data-comment-id', comment.id);
-    
+
     // Format the date properly
     let formattedDate = 'תאריך לא ידוע';
     try {
@@ -106,15 +106,15 @@ function addCommentToDisplay(comment, parentName = null, repliesMap = null) {
     } catch (error) {
         console.error('Error formatting date:', error);
     }
-    
+
     console.log('Formatted date:', formattedDate);
-    
+
     // Check if this is a reply to another comment
     const isReply = comment.replyTo && comment.replyTo.toString().trim() !== '';
-    
+
     // Get reply count for this comment
     const replyCount = repliesMap ? repliesMap.get(comment.id.toString())?.length || 0 : 0;
-    
+
     commentElement.innerHTML = `
         <div class="comment-header">
             <span class="commenter-name">${escapeHtml(comment.name)}</span>
@@ -124,7 +124,18 @@ function addCommentToDisplay(comment, parentName = null, repliesMap = null) {
         <div class="comment-text" contenteditable="false">${comment.text}</div>
         <div class="comment-actions">
             ${!isReply ? `
-                <button class="action-btn reply-btn" onclick="showReplyForm('${comment.id}', '${escapeHtml(comment.name)}')">
+                <button class="action-btn reply-btn" onclick="showReplyForm('${comment.id}', '${escapeHtml(comment.name)}')" 
+                style="  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    font-weight: 500;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);"
+                >
                     <span class="material-icons" style="font-size: 1rem; margin-left: 0.25rem;">reply</span>
                     השב
                 </button>
@@ -159,7 +170,7 @@ function addCommentToDisplay(comment, parentName = null, repliesMap = null) {
         </div>
         ${!isReply && replyCount > 0 ? `<div class="replies-container" id="replies-${comment.id}" style="display: none;"></div>` : ''}
     `;
-    
+
     // Add special styling for replies
     if (isReply) {
         commentElement.style.marginLeft = '2rem';
@@ -170,12 +181,12 @@ function addCommentToDisplay(comment, parentName = null, repliesMap = null) {
         commentElement.style.marginTop = '0.5rem';
         commentElement.style.marginBottom = '0.5rem';
     }
-    
+
     console.log('Comment HTML created, adding to container');
-    
+
     // Add to end of container (so they appear in the correct order)
     commentsContainer.appendChild(commentElement);
-    
+
     // Add animation
     commentElement.style.opacity = '0';
     commentElement.style.transform = 'translateY(-20px)';
@@ -184,7 +195,7 @@ function addCommentToDisplay(comment, parentName = null, repliesMap = null) {
         commentElement.style.opacity = '1';
         commentElement.style.transform = 'translateY(0)';
     }, 10);
-    
+
     console.log('Comment added successfully');
     updateLikeButtons(); // Update like buttons after adding comment
 }
@@ -210,29 +221,35 @@ function escapeHtml(text) {
 
 
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     console.log('Discussion page loaded');
-    
+    console.log('Discussion ID:', window.DISCUSSION_ID);
+
     const commentForm = document.getElementById('commentForm');
     commentsContainer = document.getElementById('commentsContainer');
-    
+
     console.log('Comment form:', commentForm);
     console.log('Comments container:', commentsContainer);
-    
+
     // Load existing comments
     console.log('Starting to load comments...');
+    if (!window.DISCUSSION_ID) {
+        console.error('No discussion ID found!');
+        showNotification('שגיאה: מזהה דיון לא נמצא', 'error');
+        return;
+    }
     loadComments();
-    
+
     // טעינת שם וטלפון אם קיימים - וודא שהשדות קיימים קודם
     setTimeout(() => {
         const userDetails = loadUserDetailsFromLocalStorage();
         const commenterNameField = document.getElementById('commenterName');
         const commenterPhoneField = document.getElementById('commenterPhone');
-        
+
         console.log('User details loaded:', userDetails);
         console.log('Name field found:', commenterNameField);
         console.log('Phone field found:', commenterPhoneField);
-        
+
         if (commenterNameField && userDetails.name) {
             commenterNameField.value = userDetails.name;
             console.log('Set name field value:', userDetails.name);
@@ -242,25 +259,25 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('Set phone field value:', userDetails.phone);
         }
     }, 100);
-    
+
     // Handle form submission
-    commentForm.addEventListener('submit', async function(e) {
+    commentForm.addEventListener('submit', async function (e) {
         e.preventDefault();
-        
+
         const submitBtn = document.getElementById('submitCommentBtn');
         showLoadingState(submitBtn, true);
-        
+
         const formData = new FormData(commentForm);
         const commenterName = formData.get('commenterName').trim();
         const commenterPhone = formData.get('commenterPhone').trim();
         const commentText = document.getElementById('commentText').innerHTML.trim();
-        
+
         if (!commenterName || !commenterPhone || !commentText) {
             showNotification('אנא מלא את כל השדות הנדרשים', 'error');
             showLoadingState(submitBtn, false);
             return;
         }
-        
+
         // Validate phone number
         const phoneRegex = /^0\d{1,2}-?\d{3}-?\d{4}$/;
         if (!phoneRegex.test(commenterPhone.replace(/-/g, ''))) {
@@ -268,43 +285,44 @@ document.addEventListener('DOMContentLoaded', function() {
             showLoadingState(submitBtn, false);
             return;
         }
-        
+
         // Create new comment
         const newComment = {
             name: commenterName,
             phone: commenterPhone,
             text: commentText,
-            discussionId: window.DISCUSSION_ID
+            discussionId: window.DISCUSSION_ID || 'default'
         };
-        
+
         // Save user details to localStorage
         saveUserDetailsToLocalStorage(commenterName, commenterPhone);
-        
+
         // Save comment to server
         await saveCommentToServer(newComment);
         showLoadingState(submitBtn, false);
     });
-    
+
     // Function to save comment to server
     async function saveCommentToServer(comment) {
         try {
+            console.log('Saving comment for discussion:', comment.discussionId);
             const result = await fetchFromAPI('submitDiscussionComment', 'GET', {
                 comment: comment
             });
-            
+
             if (result.success) {
                 // Generate and save token for this comment
                 const commentToken = generateCommentToken(comment.name, comment.phone);
                 saveCommentToken(result.commentId || comment.id, commentToken);
-                
+
                 // Reset form
                 commentForm.reset();
                 document.getElementById('commentText').innerHTML = '';
                 updateCharCounter();
-                
+
                 // Reload comments to show the new one
                 loadComments();
-                
+
                 // Show success message
                 showNotification('תגובתך נשלחה בהצלחה!', 'success');
             } else {
@@ -315,27 +333,40 @@ document.addEventListener('DOMContentLoaded', function() {
             showNotification('שגיאה בחיבור לשרת', 'error');
         }
     }
-    
+
     // Function to load comments from server
     async function loadComments() {
         // Show loading animation
         showCommentsLoading();
-        
+
         try {
-            console.log('Loading comments for discussion:', window.DISCUSSION_ID);
-            const result = await fetchFromAPI('getDiscussionComments', 'GET', { discussionId: window.DISCUSSION_ID });
+            const discussionId = window.DISCUSSION_ID || 'default';
+            console.log('Loading comments for discussion:', discussionId);
+            const result = await fetchFromAPI('getDiscussionComments', 'GET', { discussionId: discussionId });
             console.log('Comments result:', result);
-            
+
             // Clear existing comments
             commentsContainer.innerHTML = '';
-            
+
             if (result.data && result.data.length > 0) {
                 console.log('Found', result.data.length, 'comments');
+
+                // Filter comments by discussion ID (temporary fix until server is fixed)
+                const discussionId = window.DISCUSSION_ID || 'default';
+                let comments = result.data.filter(comment => {
+                    const commentDiscussionId = comment.discussionId || 'default';
+                    const matches = commentDiscussionId === discussionId;
+                    if (!matches) {
+                        console.log('Filtering out comment from different discussion:', comment.name, 'discussionId:', commentDiscussionId, 'expected:', discussionId);
+                    }
+                    return matches;
+                });
                 
+                console.log('After filtering, found', comments.length, 'comments for discussion:', discussionId);
+
                 // Get sort order
                 const sortOrder = getSortOrder();
-                let comments = result.data.slice();
-                
+
                 // Sort comments based on selected order
                 if (sortOrder === 'newest') {
                     comments.sort((a, b) => b.timestamp - a.timestamp);
@@ -344,14 +375,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else if (sortOrder === 'mostLiked') {
                     comments.sort((a, b) => (b.likes || 0) - (a.likes || 0));
                 }
-                
+
                 // Organize comments into hierarchy
                 const topLevelComments = [];
                 const repliesMap = new Map();
-                
+
                 // Separate top-level comments from replies
                 comments.forEach(comment => {
-                    console.log('Processing comment:', comment.name, 'ID:', comment.id, 'ReplyTo:', comment.replyTo);
+                    console.log('Processing comment:', comment.name, 'ID:', comment.id, 'ReplyTo:', comment.replyTo, 'DiscussionId:', comment.discussionId);
                     if (comment.replyTo && comment.replyTo.toString().trim() !== '') {
                         // This is a reply
                         const parentId = comment.replyTo.toString();
@@ -366,16 +397,16 @@ document.addEventListener('DOMContentLoaded', function() {
                         topLevelComments.push(comment);
                     }
                 });
-                
+
                 console.log('Top-level comments:', topLevelComments.map(c => c.name));
-                console.log('Replies map:', Array.from(repliesMap.entries()).map(([parentId, replies]) => 
+                console.log('Replies map:', Array.from(repliesMap.entries()).map(([parentId, replies]) =>
                     `${parentId}: ${replies.map(r => r.name).join(', ')}`
                 ));
-                
+
                 // Display top-level comments with their replies
                 topLevelComments.forEach(comment => {
                     addCommentToDisplay(comment, null, repliesMap);
-                    
+
                     // Add replies to this comment in the replies container
                     const replies = repliesMap.get(comment.id.toString()) || [];
                     if (replies.length > 0) {
@@ -402,16 +433,16 @@ document.addEventListener('DOMContentLoaded', function() {
             hideCommentsLoading();
         }
     }
-    
+
     // Function to show loading animation for comments
     // Function to show loading animation for comments
-    
+
     // Function to add reply to replies container
     function addReplyToContainer(reply, parentName, container) {
         const replyElement = document.createElement('div');
         replyElement.className = 'comment-item reply-item';
         replyElement.setAttribute('data-comment-id', reply.id);
-        
+
         // Format the date properly
         let formattedDate = 'תאריך לא ידוע';
         try {
@@ -434,7 +465,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } catch (error) {
             console.error('Error formatting date:', error);
         }
-        
+
         replyElement.innerHTML = `
             <div class="comment-header">
                 <span class="commenter-name">${escapeHtml(reply.name)}</span>
@@ -455,7 +486,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 ` : ''}
             </div>
         `;
-        
+
         // Add special styling for replies
         replyElement.style.marginLeft = '1rem';
         replyElement.style.borderLeft = '3px solid #007bff';
@@ -464,11 +495,11 @@ document.addEventListener('DOMContentLoaded', function() {
         replyElement.style.padding = '1rem';
         replyElement.style.marginTop = '0.5rem';
         replyElement.style.marginBottom = '0.5rem';
-        
+
         container.appendChild(replyElement);
         updateLikeButtons(); // Update like buttons after adding reply
     }
-    
+
     // Add CSS animations for notifications
     const style = document.createElement('style');
     style.textContent = `
@@ -753,61 +784,61 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     `;
     document.head.appendChild(style);
-    
+
     // Add smooth scrolling to sections
     const sections = document.querySelectorAll('section');
     sections.forEach(section => {
         section.style.scrollMarginTop = '100px';
     });
-    
+
     // Add source item click effects
     const sourceItems = document.querySelectorAll('.source-item');
     sourceItems.forEach(item => {
-        item.addEventListener('click', function() {
+        item.addEventListener('click', function () {
             // Add temporary highlight effect
             this.style.transform = 'scale(1.02)';
             this.style.boxShadow = '0 12px 30px rgba(0, 0, 0, 0.2)';
-            
+
             setTimeout(() => {
                 this.style.transform = '';
                 this.style.boxShadow = '';
             }, 200);
         });
     });
-    
+
     // Add discussion points interaction
     const discussionPoints = document.querySelectorAll('.discussion-points li');
     discussionPoints.forEach(point => {
-        point.addEventListener('click', function() {
+        point.addEventListener('click', function () {
             // Add temporary highlight
             this.style.background = '#e3f2fd';
             this.style.color = '#1976d2';
-            
+
             setTimeout(() => {
                 this.style.background = '';
                 this.style.color = '';
             }, 1000);
         });
     });
-    
+
     // Add form validation
     const formInputs = commentForm.querySelectorAll('input, textarea');
     formInputs.forEach(input => {
-        input.addEventListener('blur', function() {
+        input.addEventListener('blur', function () {
             if (this.value.trim() === '') {
                 this.style.borderColor = '#dc3545';
             } else {
                 this.style.borderColor = '';
             }
         });
-        
-        input.addEventListener('input', function() {
+
+        input.addEventListener('input', function () {
             if (this.value.trim() !== '') {
                 this.style.borderColor = '';
             }
         });
     });
-    
+
     // Add character counter for textarea
     const textarea = document.getElementById('commentText');
     const charCounter = document.createElement('div');
@@ -819,7 +850,7 @@ document.addEventListener('DOMContentLoaded', function() {
         margin-top: 0.5rem;
     `;
     textarea.parentNode.appendChild(charCounter);
-    
+
     function updateCharCounter() {
         const editor = document.getElementById('commentText');
         const charCounter = document.querySelector('.char-counter');
@@ -827,7 +858,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const count = editor.textContent.length;
             const maxLength = 1000;
             charCounter.textContent = `${count}/${maxLength} תווים`;
-            
+
             if (count > maxLength * 0.9) {
                 charCounter.style.color = '#dc3545';
             } else {
@@ -835,7 +866,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     }
-    
+
     // Add event listeners for contenteditable
     const editor = document.getElementById('commentText');
     if (editor) {
@@ -843,21 +874,21 @@ document.addEventListener('DOMContentLoaded', function() {
         editor.addEventListener('keyup', updateCharCounter);
         editor.addEventListener('paste', updateCharCounter);
         updateCharCounter(); // Initial count
-        
+
         // Add placeholder functionality
-        editor.addEventListener('focus', function() {
+        editor.addEventListener('focus', function () {
             if (this.textContent === '') {
                 this.setAttribute('data-placeholder', 'שתף את דעתך על הדיון...');
             }
         });
-        
-        editor.addEventListener('blur', function() {
+
+        editor.addEventListener('blur', function () {
             if (this.textContent === '') {
                 this.removeAttribute('data-placeholder');
             }
         });
     }
-    
+
     // הצגת שדות שם וטלפון - כעת הם גלויים כברירת מחדל
     setTimeout(() => {
         const commentTextEditor = document.getElementById('commentText');
@@ -867,9 +898,9 @@ document.addEventListener('DOMContentLoaded', function() {
             userDetailsFields.style.display = 'block';
             userDetailsFields.classList.remove('hidden');
             console.log('User details fields should be visible now');
-            
+
             // אפשרות להסתיר שדות אם התיבת טקסט ריקה (אופציונלי)
-            commentTextEditor.addEventListener('input', function() {
+            commentTextEditor.addEventListener('input', function () {
                 // השדות נשארים גלויים תמיד
             });
         } else {
@@ -878,61 +909,61 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('userDetailsFields:', userDetailsFields);
         }
     }, 100);
-    
+
     // Add formatting toolbar to reply form
     const replyEditor = document.getElementById('replyText');
     if (replyEditor) {
-        replyEditor.addEventListener('focus', function() {
+        replyEditor.addEventListener('focus', function () {
             if (this.textContent === '') {
                 this.setAttribute('data-placeholder', 'כתוב את תגובתך...');
             }
         });
-        
-        replyEditor.addEventListener('blur', function() {
+
+        replyEditor.addEventListener('blur', function () {
             if (this.textContent === '') {
                 this.removeAttribute('data-placeholder');
             }
         });
     }
-    
+
     // Dark mode support for char counter
-    const darkModeObserver = new MutationObserver(function(mutations) {
-        mutations.forEach(function(mutation) {
+    const darkModeObserver = new MutationObserver(function (mutations) {
+        mutations.forEach(function (mutation) {
             if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
                 const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
                 charCounter.style.color = isDark ? '#a0aec0' : '#6c757d';
             }
         });
     });
-    
+
     darkModeObserver.observe(document.documentElement, {
         attributes: true,
         attributeFilter: ['data-theme']
     });
-    
+
     // Reply form functionality
     const replyForm = document.getElementById('replyForm');
     const replyCommentForm = document.getElementById('replyCommentForm');
     let currentReplyTo = null;
-    
+
     // Handle reply form submission
-    replyCommentForm.addEventListener('submit', async function(e) {
+    replyCommentForm.addEventListener('submit', async function (e) {
         e.preventDefault();
-        
+
         const submitBtn = document.getElementById('submitReplyBtn');
         showLoadingState(submitBtn, true);
-        
+
         const formData = new FormData(replyCommentForm);
         const replyName = formData.get('replyName').trim();
         const replyPhone = formData.get('replyPhone').trim();
         const replyText = document.getElementById('replyText').innerHTML.trim();
-        
+
         if (!replyName || !replyPhone || !replyText) {
             showNotification('אנא מלא את כל השדות הנדרשים', 'error');
             showLoadingState(submitBtn, false);
             return;
         }
-        
+
         // Validate phone number
         const phoneRegex = /^0\d{1,2}-?\d{3}-?\d{4}$/;
         if (!phoneRegex.test(replyPhone.replace(/-/g, ''))) {
@@ -940,45 +971,45 @@ document.addEventListener('DOMContentLoaded', function() {
             showLoadingState(submitBtn, false);
             return;
         }
-        
+
         // Create reply comment
         const replyComment = {
             name: replyName,
             phone: replyPhone,
             text: replyText,
             replyTo: window.currentReplyTo,
-            discussionId: window.DISCUSSION_ID
+            discussionId: window.DISCUSSION_ID || 'default'
         };
-        
+
         // Generate token for reply
         const replyToken = generateCommentToken(replyComment.name, replyComment.phone);
-        
+
         // Save reply to server
         await saveReplyToServer(replyComment);
         showLoadingState(submitBtn, false);
     });
-    
+
     // Function to save reply to server
     async function saveReplyToServer(replyComment) {
         try {
-            console.log('Sending reply comment:', replyComment);
+            console.log('Sending reply comment for discussion:', replyComment.discussionId);
             const result = await fetchFromAPI('submitDiscussionReply', 'GET', {
                 reply: replyComment
             });
-            
+
             if (result.success) {
                 // Generate and save token for this reply
                 const replyToken = generateCommentToken(replyComment.name, replyComment.phone);
                 saveCommentToken(result.replyId || replyComment.id, replyToken);
-                
+
                 // Reset form and hide it
                 replyCommentForm.reset();
                 document.getElementById('replyText').innerHTML = '';
                 hideReplyForm();
-                
+
                 // Reload comments to show the new reply
                 loadComments();
-                
+
                 // Show success message
                 showNotification('תגובתך נשלחה בהצלחה!', 'success');
             } else {
@@ -995,22 +1026,22 @@ document.addEventListener('DOMContentLoaded', function() {
 function showReplyForm(commentId, commenterName) {
     const replyForm = document.getElementById('replyForm');
     const replyTitle = document.querySelector('.reply-title');
-    
+
     if (!replyForm || !replyTitle) return;
-    
+
     // Update title to show who we're replying to
     replyTitle.textContent = `השבת על תגובה של ${commenterName}:`;
-    
+
     // Store the comment ID we're replying to
     window.currentReplyTo = commentId;
     console.log('Set currentReplyTo to:', commentId);
-    
+
     // Show the form
     replyForm.classList.remove('hidden');
-    
+
     // Scroll to the form
     replyForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    
+
     // Focus on the name field
     document.getElementById('replyName').focus();
 }
@@ -1031,12 +1062,12 @@ function hideReplyForm() {
 function toggleReplies(commentId) {
     const repliesContainer = document.getElementById(`replies-${commentId}`);
     const toggleBtn = event.target.closest('.toggle-replies-btn');
-    
+
     if (!repliesContainer || !toggleBtn) return;
-    
+
     const icon = toggleBtn.querySelector('.material-icons');
     if (!icon) return;
-    
+
     if (repliesContainer.style.display === 'none') {
         repliesContainer.style.display = 'block';
         icon.textContent = 'expand_less';
@@ -1050,10 +1081,12 @@ function toggleReplies(commentId) {
 
 // עוזר: בדיקת לייקים ב-localStorage
 function getLikedComments() {
-    return JSON.parse(localStorage.getItem('likedComments') || '[]');
+    const discussionId = window.DISCUSSION_ID || 'default';
+    return JSON.parse(localStorage.getItem(`likedComments_${discussionId}`) || '[]');
 }
 function setLikedComments(arr) {
-    localStorage.setItem('likedComments', JSON.stringify(arr));
+    const discussionId = window.DISCUSSION_ID || 'default';
+    localStorage.setItem(`likedComments_${discussionId}`, JSON.stringify(arr));
 }
 function hasLiked(commentId) {
     return getLikedComments().includes(commentId);
@@ -1075,12 +1108,12 @@ function removeLiked(commentId) {
 async function toggleLike(commentId) {
     const likeBtn = event.target.closest('.like-btn');
     if (!likeBtn) return;
-    
+
     const likeCount = likeBtn.querySelector('.like-count');
     if (!likeCount) return;
-    
+
     const currentCount = parseInt(likeCount.textContent) || 0;
-    
+
     // מניעת לייק כפול
     if (!likeBtn.classList.contains('liked') && hasLiked(commentId)) {
         showNotification('כבר עשית לייק לתגובה זו', 'info');
@@ -1140,22 +1173,22 @@ async function toggleLike(commentId) {
 function toggleEdit(commentId) {
     const commentElement = document.querySelector(`[data-comment-id="${commentId}"]`);
     if (!commentElement) return;
-    
+
     const commentText = commentElement.querySelector('.comment-text');
     const editBtn = commentElement.querySelector('.edit-btn');
-    
+
     if (!commentText || !editBtn) return;
-    
+
     const icon = editBtn.querySelector('.material-icons');
     if (!icon) return;
-    
+
     if (commentText.contentEditable === 'false') {
         // Enable editing
         commentText.contentEditable = 'true';
         commentText.focus();
         icon.textContent = 'save';
         editBtn.innerHTML = editBtn.innerHTML.replace('ערוך', 'שמור');
-        
+
         // Add formatting toolbar
         addFormattingToolbar(commentText);
     } else {
@@ -1163,10 +1196,10 @@ function toggleEdit(commentId) {
         commentText.contentEditable = 'false';
         icon.textContent = 'edit';
         editBtn.innerHTML = editBtn.innerHTML.replace('שמור', 'ערוך');
-        
+
         // Remove formatting toolbar
         removeFormattingToolbar();
-        
+
         // Save to server (you can implement this)
         saveCommentEdit(commentId, commentText.innerHTML);
     }
@@ -1174,7 +1207,7 @@ function toggleEdit(commentId) {
 
 function addFormattingToolbar(commentText) {
     if (!commentText) return;
-    
+
     const toolbar = document.createElement('div');
     toolbar.className = 'formatting-toolbar';
     toolbar.style.cssText = `
@@ -1193,7 +1226,7 @@ function addFormattingToolbar(commentText) {
         <button onclick="formatText('underline')" title="קו תחתון" style="text-decoration: underline; padding: 8px 12px; border: 1px solid #ccc; background: white; border-radius: 4px; cursor: pointer; font-size: 14px; min-width: 40px; color: #2c3e50;">ק</button>
         <button onclick="formatText('strikethrough')" title="קו חוצה" style="text-decoration: line-through; padding: 8px 12px; border: 1px solid #ccc; background: white; border-radius: 4px; cursor: pointer; font-size: 14px; min-width: 40px; color: #2c3e50;">ח</button>
     `;
-    
+
     commentText.parentNode.insertBefore(toolbar, commentText.nextSibling);
 }
 
@@ -1262,9 +1295,10 @@ function generateCommentToken(name, phone) {
 
 function saveCommentToken(commentId, token) {
     try {
-        const tokens = JSON.parse(localStorage.getItem('commentTokens') || '{}');
+        const discussionId = window.DISCUSSION_ID || 'default';
+        const tokens = JSON.parse(localStorage.getItem(`commentTokens_${discussionId}`) || '{}');
         tokens[commentId] = token;
-        localStorage.setItem('commentTokens', JSON.stringify(tokens));
+        localStorage.setItem(`commentTokens_${discussionId}`, JSON.stringify(tokens));
     } catch (error) {
         console.error('Error saving comment token:', error);
     }
@@ -1272,17 +1306,18 @@ function saveCommentToken(commentId, token) {
 
 function isCommentAuthor(commentId, commenterName) {
     try {
-        const tokens = JSON.parse(localStorage.getItem('commentTokens') || '{}');
+        const discussionId = window.DISCUSSION_ID || 'default';
+        const tokens = JSON.parse(localStorage.getItem(`commentTokens_${discussionId}`) || '{}');
         const savedToken = tokens[commentId];
-        
+
         if (!savedToken) {
             return false;
         }
-        
+
         const decodedToken = atob(savedToken);
         const decodedData = decodeURIComponent(decodedToken);
         const [name, phone, timestamp] = decodedData.split('-');
-        
+
         // Check if the name matches (phone is optional for privacy)
         return name === commenterName;
     } catch (error) {
@@ -1294,7 +1329,7 @@ function isCommentAuthor(commentId, commenterName) {
 // Function to show/hide loading state
 function showLoadingState(button, isLoading) {
     if (!button) return;
-    
+
     const spinner = button.querySelector('.loading-spinner');
     if (isLoading) {
         button.classList.add('loading');
@@ -1305,22 +1340,24 @@ function showLoadingState(button, isLoading) {
         button.disabled = false;
         if (spinner) spinner.classList.add('hidden');
     }
-} 
+}
 
 // שמירת שם וטלפון ב-localStorage אחרי שליחת תגובה
 function saveUserDetailsToLocalStorage(name, phone) {
     try {
-        localStorage.setItem('discussionUserName', name);
-        localStorage.setItem('discussionUserPhone', phone);
+        const discussionId = window.DISCUSSION_ID || 'default';
+        localStorage.setItem(`discussionUserName_${discussionId}`, name);
+        localStorage.setItem(`discussionUserPhone_${discussionId}`, phone);
     } catch (error) {
         console.error('Error saving user details to localStorage:', error);
     }
 }
 function loadUserDetailsFromLocalStorage() {
     try {
+        const discussionId = window.DISCUSSION_ID || 'default';
         return {
-            name: localStorage.getItem('discussionUserName') || '',
-            phone: localStorage.getItem('discussionUserPhone') || ''
+            name: localStorage.getItem(`discussionUserName_${discussionId}`) || '',
+            phone: localStorage.getItem(`discussionUserPhone_${discussionId}`) || ''
         };
     } catch (error) {
         console.error('Error loading user details from localStorage:', error);
@@ -1332,14 +1369,16 @@ function loadUserDetailsFromLocalStorage() {
 const sortSelect = document.getElementById('sortCommentsSelect');
 const SORT_KEY = 'commentsSortOrder';
 function getSortOrder() {
-    return localStorage.getItem(SORT_KEY) || 'newest';
+    const discussionId = window.DISCUSSION_ID || 'default';
+    return localStorage.getItem(`${SORT_KEY}_${discussionId}`) || 'newest';
 }
 function setSortOrder(val) {
-    localStorage.setItem(SORT_KEY, val);
+    const discussionId = window.DISCUSSION_ID || 'default';
+    localStorage.setItem(`${SORT_KEY}_${discussionId}`, val);
 }
 if (sortSelect) {
     sortSelect.value = getSortOrder();
-    sortSelect.addEventListener('change', function() {
+    sortSelect.addEventListener('change', function () {
         setSortOrder(this.value);
         loadComments();
     });
@@ -1349,11 +1388,23 @@ if (sortSelect) {
 async function loadComments() {
     showCommentsLoading();
     try {
-        const result = await fetchFromAPI('getDiscussionComments', 'GET', { discussionId: window.DISCUSSION_ID });
+        const discussionId = window.DISCUSSION_ID || 'default';
+        const result = await fetchFromAPI('getDiscussionComments', 'GET', { discussionId: discussionId });
         commentsContainer.innerHTML = '';
         if (result.data && result.data.length > 0) {
+            // Filter comments by discussion ID (temporary fix until server is fixed)
+            let comments = result.data.filter(comment => {
+                const commentDiscussionId = comment.discussionId || 'default';
+                const matches = commentDiscussionId === discussionId;
+                if (!matches) {
+                    console.log('Filtering out comment from different discussion:', comment.name, 'discussionId:', commentDiscussionId, 'expected:', discussionId);
+                }
+                return matches;
+            });
+            
+            console.log('After filtering, found', comments.length, 'comments for discussion:', discussionId);
+            
             // סידור ראשי
-            let comments = result.data.slice();
             const sortOrder = getSortOrder();
             if (sortOrder === 'newest') {
                 comments.sort((a, b) => b.timestamp - a.timestamp);
@@ -1388,7 +1439,7 @@ async function loadComments() {
     } finally {
         hideCommentsLoading();
     }
-} 
+}
 
 // תיקון לוגיקת הלייק: סימון לייק בירוק גם אחרי ריענון, ואם לוחץ שוב - יוריד את הלייק
 function updateLikeButtons() {

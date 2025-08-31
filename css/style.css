@@ -101,7 +101,7 @@ body {
 
 .back-button {
     background: rgba(255,255,255,0.2);
-    color: white;
+    color: rgb(3, 3, 3);
     text-decoration: none;
     padding: 0.75rem 1.5rem;
     border-radius: 10px;
@@ -333,18 +333,27 @@ body {
 }
 
 .form-group input[type="text"],
-.form-group input[type="tel"] {
+.form-group input[type="tel"],
+.form-group select,
+.form-group textarea {
     width: 100%;
     padding: 1rem;
     border: 2px solid #e0e0e0;
     border-radius: 10px;
     font-size: 1rem;
-    transition: border-color 0.3s ease;
+    transition: all 0.3s ease;
+    font-family: inherit;
+    background: #fafafa;
 }
 
-.form-group input:focus {
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
     outline: none;
     border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    background: white;
+    transform: translateY(-1px);
 }
 
 .branch-search-container {
@@ -395,6 +404,127 @@ body {
     color: #2c3e50;
 }
 
+.no-branches-message {
+    padding: 1rem;
+    text-align: center;
+    color: #666;
+    font-style: italic;
+}
+
+/* מתג מעוצב */
+.toggle-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.4s;
+    border-radius: 34px;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.toggle-switch input:checked + .toggle-slider {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.toggle-switch input:checked + .toggle-slider:before {
+    transform: translateX(26px);
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.toggle-switch:hover .toggle-slider {
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.15), 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.toggle-switch input:checked + .toggle-slider {
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1), 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+.toggle-switch input:focus + .toggle-slider {
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1), 0 0 0 3px rgba(102, 126, 234, 0.3);
+}
+
+.toggle-label {
+    font-weight: 500;
+    color: #2c3e50;
+    font-size: 1rem;
+}
+
+/* הודעת הצלחה זמנית */
+.temp-success-message {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+    color: white;
+    padding: 1rem;
+    border-radius: 10px;
+    margin-bottom: 1.5rem;
+    animation: slideInDown 0.5s ease-out, fadeOut 0.5s ease-out 2.5s forwards;
+    box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+}
+
+.temp-success-message .material-icons {
+    font-size: 1.2rem;
+}
+
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+}
+
 .checkbox-group {
     display: flex;
     align-items: center;
@@ -425,6 +555,60 @@ body {
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.submit-button .loading-spinner {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    justify-content: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.submit-button .loading-spinner:not(.hidden) {
+    opacity: 1;
+}
+
+.submit-button .btn-text {
+    transition: opacity 0.3s ease;
+}
+
+.submit-button .btn-text.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.submit-button:disabled {
+    opacity: 0.8;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.submit-button:disabled::before {
+    display: none;
+}
+
+.submit-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.submit-button:hover::before {
+    left: 100%;
 }
 
 .submit-button:hover {
@@ -1150,7 +1334,8 @@ body {
     z-index: 9999;
 }
 
-.loading.hidden {
+.loading.hidden,
+.loading-spinner.hidden {
     display: none;
 }
 
@@ -1788,7 +1973,7 @@ body {
 .page-hero {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border-radius: 25px;
-    padding: 3rem 2rem;
+    padding: 1rem 1rem;
     text-align: center;
     color: white;
     margin-bottom: 3rem;
@@ -1824,6 +2009,7 @@ body {
 .topics-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    justify-content: center;
     gap: 2rem;
 }
 
@@ -1863,6 +2049,11 @@ body {
 
 .topic-content {
     padding: 1.5rem;
+}
+
+.topic-card-link {
+    text-decoration: none;
+    color: inherit;
 }
 
 .topic-title {
@@ -1955,4 +2146,449 @@ body {
 .back-button:hover {
     transform: translateY(-2px);
     box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+/* ===== מעשה טוב - סגנונות מיוחדים ===== */
+
+/* מיכל מעשה טוב */
+.good-deed-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* ספירה של מעשים טובים */
+.deed-counter {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.counter-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.counter-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="stars" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1" fill="white" opacity="0.3"/></pattern></defs><rect width="100" height="100" fill="url(%23stars)"/></svg>');
+    pointer-events: none;
+}
+
+.counter-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+}
+
+.counter-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.9;
+}
+
+.counter-info h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    opacity: 0.9;
+}
+
+.counter-number {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin: 0;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* טופס מעשה טוב */
+.good-deed-form {
+    background: white;
+    border-radius: 25px;
+    padding: 3rem;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+    margin-bottom: 3rem;
+}
+
+.form-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.form-header h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+.form-header p {
+    color: #666;
+    font-size: 1.1rem;
+}
+
+/* שדות מיוחדים */
+.char-counter {
+    text-align: left;
+    font-size: 0.9rem;
+    color: #7f8c8d;
+    margin-top: 0.5rem;
+    transition: color 0.3s ease;
+}
+
+.char-counter.warning {
+    color: #f39c12;
+}
+
+.char-counter.danger {
+    color: #e74c3c;
+}
+
+.feeling-options {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.feeling-option {
+    position: relative;
+}
+
+.feeling-option input[type="radio"] {
+    display: none;
+}
+
+.feeling-option label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1.5rem 1rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.feeling-option label:hover {
+    border-color: #667eea;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+}
+
+.feeling-option input[type="radio"]:checked + label {
+    border-color: #667eea;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+}
+
+.feeling-option .material-icons {
+    font-size: 2rem;
+    transition: transform 0.3s ease;
+}
+
+.feeling-option label:hover .material-icons {
+    transform: scale(1.1);
+}
+
+/* מעשים טובים אחרונים */
+.recent-deeds {
+    margin-top: 4rem;
+}
+
+.recent-deeds h2 {
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 2rem;
+}
+
+.deeds-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.deed-card {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid #f0f0f0;
+}
+
+.deed-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+}
+
+/* הודעת ריק */
+.no-deeds-message {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.no-deeds-message .material-icons {
+    font-size: 4rem;
+    color: #bbb;
+    margin-bottom: 1rem;
+    animation: bounce 2s infinite;
+}
+
+.no-deeds-message h3 {
+    font-size: 1.5rem;
+    color: #666;
+    margin-bottom: 0.5rem;
+}
+
+.no-deeds-message p {
+    color: #999;
+    font-size: 1.1rem;
+}
+
+.deed-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.deed-icon {
+    font-size: 2.5rem;
+    color: #667eea;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.deed-info h4 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 0 0 0.25rem 0;
+}
+
+.deed-type {
+    color: #667eea;
+    font-weight: 500;
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.feeling-icon {
+    font-size: 1.5rem;
+    color: #27ae60;
+    margin-right: auto;
+}
+
+.deed-content {
+    margin-bottom: 1.5rem;
+}
+
+.deed-content p {
+    color: #555;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.deed-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    color: #888;
+}
+
+.deed-time {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.deed-feeling {
+    background: #f8f9fa;
+    padding: 0.3rem 0.8rem;
+    border-radius: 15px;
+    font-weight: 500;
+}
+
+/* מודל הצלחה */
+.success-modal .modal-content {
+    text-align: center;
+    padding: 2rem;
+}
+
+.success-animation {
+    margin-bottom: 2rem;
+}
+
+.success-animation .material-icons {
+    font-size: 3rem;
+    margin: 0 0.5rem;
+    animation: bounce 1s infinite;
+}
+
+.success-animation .material-icons:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.success-animation .material-icons:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+.success-content h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 1rem;
+}
+
+.success-content p {
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+}
+
+.blessing {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-top: 2rem;
+}
+
+.blessing-text {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+.blessing-content {
+    color: #667eea;
+    font-style: italic;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* אנימציות */
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-10px);
+    }
+    60% {
+        transform: translateY(-5px);
+    }
+}
+
+@keyframes celebrate {
+    0% {
+        transform: scale(1) rotate(0deg);
+    }
+    25% {
+        transform: scale(1.1) rotate(-5deg);
+    }
+    50% {
+        transform: scale(1.2) rotate(5deg);
+    }
+    75% {
+        transform: scale(1.1) rotate(-2deg);
+    }
+    100% {
+        transform: scale(1) rotate(0deg);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* אייקון לב */
+.heart-icon {
+    color: #e74c3c;
+    animation: heartbeat 2s infinite;
+}
+
+@keyframes heartbeat {
+    0% {
+        transform: scale(1);
+    }
+    14% {
+        transform: scale(1.1);
+    }
+    28% {
+        transform: scale(1);
+    }
+    42% {
+        transform: scale(1.1);
+    }
+    70% {
+        transform: scale(1);
+    }
+}
+
+/* רספונסיביות */
+@media (max-width: 768px) {
+    .deed-counter {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .good-deed-form {
+        padding: 2rem;
+        margin: 0 1rem 2rem 1rem;
+    }
+    
+    .feeling-options {
+        grid-template-columns: 1fr;
+    }
+    
+    .deeds-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .deed-card {
+        padding: 1.5rem;
+    }
+    
+    .counter-card {
+        padding: 1.5rem;
+    }
+    
+    .counter-number {
+        font-size: 2rem;
+    }
 } 

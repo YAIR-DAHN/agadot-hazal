@@ -9,6 +9,7 @@ const REGISTRATION_SHEET_NAME = 'רישום'; // גיליון חדש לרישו�
 const PODCAST_LOTTERY_SHEET_NAME = 'פודקאסט הגרלה';
 const PODCAST_LISTENS_SHEET_NAME = 'האזנות פודקאסט';
 const DISCUSSION_COMMENTS_SHEET_NAME = 'תגובות דיון';
+const GOOD_DEEDS_SHEET_NAME = 'מעשים טובים';
 
 function doGet(e) {
   const response = ContentService.createTextOutput()
@@ -142,6 +143,17 @@ function handleRequest(e) {
       
     case 'getDiscussionComments':
       return getDiscussionComments(e);
+      
+    case 'submitGoodDeed':
+      if (!data) {
+        return { error: 'No data provided' };
+      }
+      // תמיכה בפורמטים שונים של נתונים
+      const deedData = data.deedData || data;
+      return submitGoodDeed(deedData);
+      
+    case 'getGoodDeeds':
+      return getGoodDeeds();
       
     default:
       return {
@@ -541,6 +553,16 @@ function setupSpreadsheet() {
     discussionCommentsSheet.setFrozenRows(1);
   }
   
+  // הגדרת גיליון מעשים טובים
+  let goodDeedsSheet = ss.getSheetByName(GOOD_DEEDS_SHEET_NAME);
+  if (!goodDeedsSheet) {
+    goodDeedsSheet = ss.insertSheet(GOOD_DEEDS_SHEET_NAME);
+    goodDeedsSheet.getRange('A1:H1').setValues([
+      ['תאריך', 'שם מלא', 'טלפון', 'סניף', 'סוג מעשה טוב', 'תיאור', 'הרגשה', 'זמן יצירה']
+    ]);
+    goodDeedsSheet.setFrozenRows(1);
+  }
+  
   return "Spreadsheet setup completed";
 }
 
@@ -892,5 +914,145 @@ function unlikeComment(commentId) {
   } catch (error) {
     console.error('שגיאה בביטול לייק תגובה:', error);
     return { success: false, error: 'שגיאה בעדכון הלייק' };
+  }
+}
+
+// פונקציה לשמירת מעשה טוב
+function submitGoodDeed(deedData) {
+  console.log("קבלת בקשת מעשה טוב:", JSON.stringify(deedData));
+  
+  if (!deedData || !deedData.fullName || !deedData.phone || !deedData.branch || 
+      !deedData.deedType || !deedData.description || !deedData.feeling) {
+    console.error("חסרים פרטי מעשה טוב:", JSON.stringify(deedData));
+    return {
+      success: false,
+      error: 'חסרים פרטי מעשה טוב נדרשים'
+    };
+  }
+
+  try {
+    // בדיקה אם קיים גיליון מעשים טובים, ואם לא - יוצרים אותו
+    let ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    let goodDeedsSheet = ss.getSheetByName(GOOD_DEEDS_SHEET_NAME);
+    
+    if (!goodDeedsSheet) {
+      console.log("יוצר גיליון מעשים טובים חדש");
+      goodDeedsSheet = ss.insertSheet(GOOD_DEEDS_SHEET_NAME);
+      goodDeedsSheet.getRange('A1:I1').setValues([
+        ['תאריך', 'שם מלא', 'טלפון', 'סניף', 'סוג מעשה טוב', 'תיאור', 'הרגשה', 'הצגה פומבית', 'זמן יצירה']
+      ]);
+      goodDeedsSheet.setFrozenRows(1);
+    }
+    
+    const timestamp = new Date();
+    console.log("הוספת מעשה טוב חדש עבור:", deedData.fullName);
+    
+    // שמירת המעשה הטוב
+    goodDeedsSheet.appendRow([
+      timestamp,
+      deedData.fullName,
+      deedData.phone,
+      deedData.branch,
+      deedData.deedType,
+      deedData.description,
+      deedData.feeling,
+      deedData.showPublicly ? 'כן' : 'לא',
+      timestamp.getTime()
+    ]);
+    
+    console.log("מעשה טוב נשמר בהצלחה");
+    return {
+      success: true,
+      message: 'המעשה הטוב נשלח בהצלחה!',
+      timestamp: timestamp.getTime()
+    };
+  } catch (error) {
+    console.error('שגיאת שמירת מעשה טוב:', error.toString());
+    return {
+      success: false,
+      error: 'שגיאה בשמירת המעשה הטוב: ' + error.toString()
+    };
+  }
+}
+
+// פונקציה לקבלת מעשים טובים
+function getGoodDeeds() {
+  try {
+    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    const goodDeedsSheet = ss.getSheetByName(GOOD_DEEDS_SHEET_NAME);
+    
+    if (!goodDeedsSheet) {
+      return { data: [] };
+    }
+    
+    const data = goodDeedsSheet.getDataRange().getValues();
+    if (data.length <= 1) {
+      return { data: [] };
+    }
+    
+    const headers = data[0];
+    const goodDeeds = data.slice(1)
+      .map(row => {
+        // בדיקה אם השורה ריקה
+        if (!row[0] && !row[1] && !row[2]) {
+          return null;
+        }
+        
+        const timestamp = row[0];
+        const fullName = row[1];
+        const phone = row[2];
+        const branch = row[3];
+        const deedType = row[4];
+        const description = row[5];
+        const feeling = row[6];
+        const showPublicly = row[7];
+        const creationTime = row[8];
+        
+        // בדיקה אם יש תוכן ואם המשתמש אישר הצגה פומבית
+        if (!fullName || !description || showPublicly !== 'כן') {
+          return null;
+        }
+        
+        let formattedDate = 'תאריך לא ידוע';
+        
+        try {
+          if (timestamp) {
+            const date = new Date(timestamp);
+            if (!isNaN(date.getTime())) {
+              formattedDate = date.toLocaleString('he-IL', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+              });
+            }
+          }
+        } catch (error) {
+          console.error('שגיאה בעיצוב תאריך:', error);
+        }
+        
+        return {
+          name: fullName,
+          deedType: deedType,
+          description: description,
+          feeling: feeling,
+          date: formattedDate,
+          timestamp: creationTime || (timestamp ? timestamp.getTime() : Date.now())
+        };
+      })
+      .filter(deed => deed !== null) // הסרת שורות ריקות
+      .sort((a, b) => b.timestamp - a.timestamp) // מיון לפי זמן (חדש קודם)
+      .slice(0, 10); // מגביל ל-10 מעשים טובים אחרונים
+    
+    console.log('Final good deeds:', goodDeeds);
+    return { data: goodDeeds };
+  } catch (error) {
+    console.error('שגיאה בקבלת מעשים טובים:', error);
+    return { 
+      success: false, 
+      error: 'שגיאה בקבלת המעשים הטובים: ' + error.toString(),
+      data: [] 
+    };
   }
 }
