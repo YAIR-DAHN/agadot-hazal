@@ -136,7 +136,7 @@ body {
 .hero-section {
     background: linear-gradient(135deg, #20B2AA 0%, #008B8B 100%) !important;
     border-radius: 25px;
-    padding: 3rem 2rem;
+    /* padding: 3rem 2rem; */
     text-align: center;
     color: white;
     margin-bottom: 3rem;
@@ -2154,7 +2154,8 @@ body {
 .good-deed-container {
     max-width: 800px;
     margin: 0 auto;
-    padding: 2rem;
+    padding-top: 2rem;
+    /* padding: 2rem; */
 }
 
 /* ספירה של מעשים טובים */
@@ -2568,7 +2569,7 @@ body {
     
     .good-deed-form {
         padding: 2rem;
-        margin: 0 1rem 2rem 1rem;
+        /* margin: 0 1rem 2rem 1rem; */
     }
     
     .feeling-options {
